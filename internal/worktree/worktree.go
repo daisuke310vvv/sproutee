@@ -114,6 +114,14 @@ type WorktreeInfo struct {
 	Commit string
 }
 
+type WorktreeStatus struct {
+	HasUnstagedChanges bool
+	HasStagedChanges   bool
+	HasUntrackedFiles  bool
+	ChangedFiles       []string
+	UntrackedFiles     []string
+}
+
 func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 	var worktrees []WorktreeInfo
 	lines := strings.Split(strings.TrimSpace(output), "\n")
@@ -151,6 +159,80 @@ func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 	return worktrees, nil
 }
 
+func (m *Manager) CheckWorktreeStatus(worktreePath string) (*WorktreeStatus, error) {
+	cmd := exec.Command("git", "status", "--porcelain")
+	cmd.Dir = worktreePath
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to check git status: %w", err)
+	}
+	
+	status := &WorktreeStatus{}
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	
+	for _, line := range lines {
+		if len(line) < 2 {
+			continue
+		}
+		
+		indexStatus := line[0]
+		workTreeStatus := line[1]
+		fileName := strings.TrimSpace(line[2:])
+		
+		if indexStatus != ' ' && indexStatus != '?' {
+			status.HasStagedChanges = true
+			status.ChangedFiles = append(status.ChangedFiles, fileName)
+		}
+		
+		if workTreeStatus != ' ' && workTreeStatus != '?' {
+			status.HasUnstagedChanges = true
+			if !contains(status.ChangedFiles, fileName) {
+				status.ChangedFiles = append(status.ChangedFiles, fileName)
+			}
+		}
+		
+		if indexStatus == '?' && workTreeStatus == '?' {
+			status.HasUntrackedFiles = true
+			status.UntrackedFiles = append(status.UntrackedFiles, fileName)
+		}
+	}
+	
+	return status, nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *WorktreeStatus) IsClean() bool {
+	return !s.HasUnstagedChanges && !s.HasStagedChanges && !s.HasUntrackedFiles
+}
+
+func (s *WorktreeStatus) GetStatusSummary() string {
+	if s.IsClean() {
+		return "✅ Clean (no uncommitted changes)"
+	}
+	
+	var issues []string
+	if s.HasStagedChanges {
+		issues = append(issues, "staged changes")
+	}
+	if s.HasUnstagedChanges {
+		issues = append(issues, "unstaged changes")
+	}
+	if s.HasUntrackedFiles {
+		issues = append(issues, fmt.Sprintf("%d untracked files", len(s.UntrackedFiles)))
+	}
+	
+	return "⚠️  " + strings.Join(issues, ", ")
+}
+
 func (m *Manager) RemoveWorktree(worktreePath string) error {
 	cmd := exec.Command("git", "worktree", "remove", worktreePath)
 	cmd.Dir = m.RepoRoot
@@ -158,6 +240,18 @@ func (m *Manager) RemoveWorktree(worktreePath string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to remove worktree: %w\nOutput: %s", err, string(output))
+	}
+	
+	return nil
+}
+
+func (m *Manager) ForceRemoveWorktree(worktreePath string) error {
+	cmd := exec.Command("git", "worktree", "remove", "--force", worktreePath)
+	cmd.Dir = m.RepoRoot
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to force remove worktree: %w\nOutput: %s", err, string(output))
 	}
 	
 	return nil

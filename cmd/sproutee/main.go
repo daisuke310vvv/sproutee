@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/daisuke310vvv/sproutee/internal/config"
 	"github.com/daisuke310vvv/sproutee/internal/copy"
@@ -152,14 +155,179 @@ var listCmd = &cobra.Command{
 var cleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean up worktrees",
-	Long:  "Remove unused or orphaned worktrees.",
+	Long:  "Remove unused or orphaned worktrees. Interactive selection with safety checks for uncommitted changes.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Cleaning up worktrees...")
-		fmt.Println("This feature is coming soon!")
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		force, _ := cmd.Flags().GetBool("force")
+		
+		manager, err := worktree.NewManager()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		worktrees, err := manager.ListWorktrees()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Filter out main worktree (repository root)
+		var cleanableWorktrees []worktree.WorktreeInfo
+		for _, wt := range worktrees {
+			if wt.Path != manager.RepoRoot {
+				cleanableWorktrees = append(cleanableWorktrees, wt)
+			}
+		}
+
+		if len(cleanableWorktrees) == 0 {
+			fmt.Println("📁 No additional worktrees found to clean.")
+			return
+		}
+
+		fmt.Printf("🔍 Found %d worktree(s) to analyze:\n\n", len(cleanableWorktrees))
+
+		// Analyze each worktree
+		type worktreeAnalysis struct {
+			Info   worktree.WorktreeInfo
+			Status *worktree.WorktreeStatus
+			Index  int
+		}
+
+		var analyses []worktreeAnalysis
+		for i, wt := range cleanableWorktrees {
+			fmt.Printf("Checking %d. %s...\n", i+1, filepath.Base(wt.Path))
+			
+			status, err := manager.CheckWorktreeStatus(wt.Path)
+			if err != nil {
+				fmt.Printf("   ❌ Error checking status: %v\n", err)
+				continue
+			}
+
+			analyses = append(analyses, worktreeAnalysis{
+				Info:   wt,
+				Status: status,
+				Index:  i + 1,
+			})
+
+			fmt.Printf("   %s\n", status.GetStatusSummary())
+			if !status.IsClean() && !force {
+				if status.HasStagedChanges || status.HasUnstagedChanges {
+					fmt.Printf("   📝 Changed files: %s\n", strings.Join(status.ChangedFiles, ", "))
+				}
+				if status.HasUntrackedFiles {
+					fmt.Printf("   📄 Untracked files: %s\n", strings.Join(status.UntrackedFiles, ", "))
+				}
+			}
+			fmt.Println()
+		}
+
+		if len(analyses) == 0 {
+			fmt.Println("❌ No worktrees could be analyzed.")
+			return
+		}
+
+		// Interactive selection
+		if !dryRun {
+			fmt.Println("💡 Select worktrees to delete:")
+			fmt.Println("   - Enter numbers separated by commas (e.g., 1,3,5)")
+			fmt.Println("   - Enter 'clean' to delete only clean worktrees")
+			fmt.Println("   - Enter 'all' to delete all worktrees")
+			fmt.Println("   - Enter 'cancel' to abort")
+			
+			if !force {
+				fmt.Println("   ⚠️  Worktrees with uncommitted changes will require confirmation")
+			}
+			
+			fmt.Print("\nYour choice: ")
+			reader := bufio.NewReader(os.Stdin)
+			input, _ := reader.ReadString('\n')
+			input = strings.TrimSpace(input)
+
+			if input == "cancel" {
+				fmt.Println("❌ Operation cancelled.")
+				return
+			}
+
+			var selectedIndices []int
+			if input == "all" {
+				for _, analysis := range analyses {
+					selectedIndices = append(selectedIndices, analysis.Index)
+				}
+			} else if input == "clean" {
+				for _, analysis := range analyses {
+					if analysis.Status.IsClean() {
+						selectedIndices = append(selectedIndices, analysis.Index)
+					}
+				}
+				if len(selectedIndices) == 0 {
+					fmt.Println("📁 No clean worktrees found.")
+					return
+				}
+			} else {
+				parts := strings.Split(input, ",")
+				for _, part := range parts {
+					if idx, err := strconv.Atoi(strings.TrimSpace(part)); err == nil {
+						if idx >= 1 && idx <= len(analyses) {
+							selectedIndices = append(selectedIndices, idx)
+						}
+					}
+				}
+			}
+
+			if len(selectedIndices) == 0 {
+				fmt.Println("❌ No valid worktrees selected.")
+				return
+			}
+
+			// Process deletions
+			fmt.Printf("\n🗑️  Removing %d worktree(s):\n", len(selectedIndices))
+			for _, idx := range selectedIndices {
+				analysis := analyses[idx-1]
+				fmt.Printf("\n🔄 Processing: %s\n", filepath.Base(analysis.Info.Path))
+				
+				if !analysis.Status.IsClean() && !force {
+					fmt.Printf("⚠️  This worktree has uncommitted changes!\n")
+					fmt.Printf("   %s\n", analysis.Status.GetStatusSummary())
+					fmt.Print("   Continue with deletion? (y/N): ")
+					
+					confirmInput, _ := reader.ReadString('\n')
+					if strings.ToLower(strings.TrimSpace(confirmInput)) != "y" {
+						fmt.Println("   ⏭️  Skipped.")
+						continue
+					}
+				}
+
+				var removeErr error
+				if force || !analysis.Status.IsClean() {
+					removeErr = manager.ForceRemoveWorktree(analysis.Info.Path)
+				} else {
+					removeErr = manager.RemoveWorktree(analysis.Info.Path)
+				}
+
+				if removeErr != nil {
+					fmt.Printf("   ❌ Failed: %v\n", removeErr)
+				} else {
+					fmt.Printf("   ✅ Deleted: %s\n", filepath.Base(analysis.Info.Path))
+				}
+			}
+		} else {
+			fmt.Println("🔍 Dry run - no worktrees will be deleted:")
+			for _, analysis := range analyses {
+				status := "would delete"
+				if !analysis.Status.IsClean() && !force {
+					status = "would require confirmation"
+				}
+				fmt.Printf("   %d. %s - %s\n", analysis.Index, filepath.Base(analysis.Info.Path), status)
+			}
+		}
 	},
 }
 
 func init() {
+	cleanCmd.Flags().Bool("dry-run", false, "Show what would be deleted without actually deleting")
+	cleanCmd.Flags().Bool("force", false, "Force deletion without confirmation for worktrees with uncommitted changes")
+	
 	configCmd.AddCommand(configInitCmd)
 	configCmd.AddCommand(configListCmd)
 	
