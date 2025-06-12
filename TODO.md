@@ -183,12 +183,14 @@ sproutee help           # ヘルプ表示
 - [ ] 設定ファイル仕様書作成
 
 ### 🚀 リリース準備（Homebrew配布）
-- [ ] Goビルド設定（マルチプラットフォーム対応）
+- [x] Goビルド設定（マルチプラットフォーム対応）
+- [x] GoReleaser設定（自動ビルド・リリース）
+- [x] GitHub Releases設定
+- [x] CI/CDパイプライン構築（GitHub Actions）
+- [x] golangci-lint設定
+- [x] MITライセンス追加
 - [ ] Homebrew Formulaファイル作成
-- [ ] GitHub Releases設定
 - [ ] Homebrew tap リポジトリ作成
-- [ ] GoReleaser設定（自動ビルド・リリース）
-- [ ] CI/CDパイプライン構築（GitHub Actions）
 - [ ] リリースノート作成
 
 ## 技術仕様
@@ -274,6 +276,31 @@ sproutee clean
 - ✅ 包括的なユニットテスト
 - ✅ プロフェッショナルなOSS向けドキュメント
 - ✅ 混乱回避のための`.git/sproutee-worktrees/`ディレクトリ使用
+- ✅ 完全なリリースインフラ（GoReleaser + GitHub Actions）
+- ✅ 自動CI/CD パイプライン
+- ✅ コード品質チェック（golangci-lint）
+
+## リリース準備状況
+
+### ✅ 完了済み
+- プロジェクト基盤構築
+- 全コア機能実装
+- ユニットテスト（100%）
+- プロフェッショナルドキュメント
+- リリースインフラ設定
+- CI/CD パイプライン
+
+### 🚀 v0.1.0 リリース準備完了
+タグ作成でGitHub Releasesに自動配布：
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+### 📋 残りタスク（任意）
+- Homebrew Formula作成（配布強化）
+- 統合テスト追加
+- エラーハンドリング強化
 
 ## ライセンス
 
