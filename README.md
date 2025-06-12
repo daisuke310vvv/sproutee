@@ -1,110 +1,131 @@
-# Sproutee
+# Sproutee 🌱
 
-Git Worktreeを活用した開発環境管理CLIツール
+A powerful CLI tool for efficient Git worktree management with automated file copying and multi-editor integration.
 
-## 概要
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-blue.svg)](https://golang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#testing)
 
-Sprouteeは、Gitリポジトリ内でworktreeを効率的に管理し、必要なファイルを自動でコピーするCLIツールです。開発時に複数のブランチで作業する際に、環境設定ファイルやプロジェクト固有のファイルを簡単にworktreeに複製できます。
+## Overview
 
-## 機能要件
+Sproutee streamlines your Git workflow by automating worktree creation and intelligently copying specified files to new worktrees. Perfect for developers who work with multiple branches simultaneously and need consistent development environments across worktrees.
 
-### 1. Git Worktree作成機能
-- 現在のリポジトリで`git worktree add`を実行
-- worktreeの保存先：`.git/sproutee-worktrees/`ディレクトリ内
-- ディレクトリ名：`[指定名]_[ランダム文字列]`の形式
+### Key Features
 
-### 2. ファイルコピー機能
-- worktree作成後、指定されたファイルを自動コピー
-- コピー対象ファイルは設定ファイルで管理
+- 🚀 **Automated Worktree Creation**: Creates Git worktrees with timestamp-based naming
+- 📁 **Smart File Copying**: Automatically copies configured files to new worktrees
+- 🎯 **Multi-Editor Support**: Launch Cursor, VS Code, Xcode, or Android Studio automatically
+- ⚙️ **Flexible Configuration**: JSON-based configuration for file management
+- 🧹 **Safe Cleanup**: Interactive worktree cleanup with uncommitted change detection
+- 🔍 **Status Monitoring**: Track worktree status and changes
+- 🛡️ **Cross-Platform**: Works on macOS, Windows, and Linux
 
-### 3. 設定ファイル管理
-- コピー対象ファイルのリストを設定ファイルに記載
-- 設定ファイル形式：JSON
+## Quick Start
 
-### 4. コマンドライン インターフェース
-- worktree名をコマンド引数で指定可能
-- 直感的なコマンド構造
-
-## 実装手順
-
-### Phase 1: プロジェクト基盤構築
-1. **Golang開発環境セットアップ**
-   - asdfでGo 1.24.4をインストール
-   - `go mod init github.com/[username]/sproutee`でプロジェクト初期化
-   - プロジェクト構造作成（cmd/, internal/, pkg/）
-   - go.modファイル設定
-
-2. **基本CLIフレームワーク**
-   - Cobraライブラリ導入（github.com/spf13/cobra）
-   - コマンドライン引数パース機能
-   - ヘルプメッセージ表示
-   - エラーハンドリング基盤
-
-### Phase 2: 設定ファイル機能
-1. **設定ファイル構造設計**
-   - 設定ファイル形式決定
-   - デフォルト設定ファイル作成
-   - 設定ファイル読み込み機能
-
-2. **設定ファイル管理**
-   - 設定ファイル存在チェック
-   - 設定ファイル検証機能
-   - 設定ファイル作成コマンド
-
-### Phase 3: Git Worktree機能
-1. **Git操作基盤**
-   - Gitリポジトリ検出
-   - Git worktreeコマンド実行
-   - エラーハンドリング
-
-2. **Worktree作成機能**
-   - ランダム文字列生成
-   - ディレクトリ名生成ロジック
-   - worktree作成コマンド実行
-
-### Phase 4: ファイルコピー機能
-1. **ファイル操作**
-   - ファイル存在チェック
-   - ファイルコピー機能
-   - ディレクトリ構造保持
-
-2. **バッチコピー機能**
-   - 設定ファイルからファイルリスト読み込み
-   - 複数ファイル一括コピー
-   - コピー結果レポート
-
-### Phase 5: 統合とテスト
-1. **機能統合**
-   - 全機能の連携テスト
-   - エラーケース対応
-   - ユーザビリティ改善
-
-2. **ドキュメント整備**
-   - 使用方法ドキュメント
-   - 設定ファイル例
-   - トラブルシューティング
-
-## コマンド仕様（予定）
+### Installation
 
 ```bash
-# 基本的な使用方法
-sproutee create <worktree-name> [branch-name]
+# Build from source
+git clone https://github.com/daisuke310vvv/sproutee.git
+cd sproutee
+go build -o sproutee cmd/sproutee/main.go
 
-# 設定ファイル管理
-sproutee config init    # 設定ファイル作成
-sproutee config list    # 設定内容表示
-sproutee config edit    # 設定ファイル編集
-
-# その他
-sproutee list           # 作成済みworktree一覧
-sproutee clean          # 不要なworktree削除
-sproutee help           # ヘルプ表示
+# Move to your PATH (optional)
+mv sproutee /usr/local/bin/
 ```
 
-## 設定ファイル例
+### Basic Usage
+
+```bash
+# Initialize configuration
+sproutee config init
+
+# Create a worktree from main branch
+sproutee create feature-auth main
+
+# Create worktree and open in VS Code
+sproutee create bugfix-login develop --vscode
+
+# List all worktrees
+sproutee list
+
+# Clean up worktrees interactively
+sproutee clean
+```
+
+## Commands
+
+### `sproutee create <name> [branch]`
+
+Creates a new Git worktree with automatic file copying.
+
+```bash
+# Basic usage
+sproutee create feature-dashboard main
+
+# With editor integration
+sproutee create feature-auth main --cursor    # Open in Cursor
+sproutee create hotfix-bug develop --vscode   # Open in VS Code
+sproutee create ios-feature main --xcode      # Open in Xcode (macOS only)
+sproutee create android-fix main --android-studio  # Open in Android Studio
+```
+
+**Options:**
+- `--cursor`: Open worktree in Cursor editor
+- `--vscode`: Open worktree in VS Code
+- `--xcode`: Open worktree in Xcode (macOS only)
+- `--android-studio`: Open worktree in Android Studio
+
+### `sproutee config`
+
+Manage configuration settings.
+
+```bash
+sproutee config init    # Create default configuration file
+sproutee config list    # Show current configuration
+```
+
+### `sproutee list`
+
+Display all existing worktrees with branch and commit information.
+
+```bash
+sproutee list
+# Output:
+# Found 2 worktree(s):
+#   1. /path/to/repo/.git/sproutee-worktrees/feature_20241212_143022 (branch: feature-auth) [a1b2c3d4]
+#   2. /path/to/repo/.git/sproutee-worktrees/bugfix_20241212_144055 (branch: bugfix-login) [e5f6g7h8]
+```
+
+### `sproutee clean`
+
+Interactively clean up worktrees with safety checks.
+
+```bash
+sproutee clean                    # Interactive cleanup
+sproutee clean --dry-run          # Preview what would be deleted
+sproutee clean --force            # Skip confirmation for dirty worktrees
+```
+
+**Features:**
+- Detects uncommitted changes
+- Shows file status for each worktree
+- Interactive selection (by number, 'clean', or 'all')
+- Safety confirmations for worktrees with changes
+
+## Configuration
+
+Sproutee uses a `sproutee.json` configuration file to define which files to copy to new worktrees.
+
+### Configuration File Location
+
+Sproutee searches for `sproutee.json` in the following order:
+1. Current directory
+2. Parent directories (up to repository root)
+
+### Configuration Format
 
 ```json
-// sproutee.json
 {
   "copy_files": [
     ".env",
@@ -118,145 +139,219 @@ sproutee help           # ヘルプ表示
 }
 ```
 
-## 開発TODO
+### Configuration Examples
 
-### 🏗️ プロジェクト基盤（Golang）
-- [x] asdfでGo 1.24.4の開発環境セットアップ
-- [x] .tool-versionsファイル作成（`golang 1.24.4`）
-- [x] `go mod init`でプロジェクト初期化
-- [x] 標準的なGolangプロジェクト構造作成
-  - [x] `cmd/sproutee/main.go`（エントリーポイント）
-  - [x] `internal/`（内部パッケージ）
-  - [x] `pkg/`（外部公開パッケージ）
-- [x] go.mod依存関係設定
-- [x] .gitignore作成（Go用）
-- [x] Cobraライブラリ導入（CLI framework）
-
-### ⚙️ 設定ファイル機能
-- [x] JSON設定ファイル構造設計
-- [x] encoding/json 標準ライブラリを使用
-- [x] 設定ファイル読み込み機能実装
-- [x] 設定ファイル作成コマンド実装（`sproutee config init`）
-- [x] 設定ファイル検証機能実装
-- [x] デフォルト設定ファイル（sproutee.json）作成
-- [x] 設定ファイルパス検索機能（カレントディレクトリ→親ディレクトリ）
-
-### 🌿 Worktree管理機能
-- [x] Gitリポジトリ検出機能
-- [x] ランダム文字列生成機能
-- [x] ディレクトリ名生成ロジック
-- [x] `git worktree add`コマンド実行機能
-- [x] `.git/sproutee-worktrees/`ディレクトリ管理
-- [x] Worktree作成コマンド実装
-
-### 📁 ファイルコピー機能
-- [x] ファイル存在チェック機能
-- [x] 単一ファイルコピー機能
-- [x] ディレクトリ構造保持コピー機能
-- [x] 設定ファイルからファイルリスト読み込み
-- [x] 複数ファイル一括コピー機能
-- [x] コピー結果レポート機能
-
-### 🖥️ CLI機能
-- [x] コマンドライン引数パース
-- [x] `create`コマンド実装（worktree作成＋ファイルコピー完全統合）
-- [x] `config`サブコマンド実装（`init`, `list`）
-- [x] `list`コマンド実装
-- [x] `clean`コマンド実装
-- [x] ヘルプメッセージ実装
-- [ ] エラーメッセージ改善
-
-### 🧪 テスト・品質
-- [x] ユニットテスト作成
-- [ ] 統合テスト作成
-- [ ] エラーハンドリングテスト
-- [ ] パフォーマンステスト
-- [ ] マルチプラットフォーム対応確認
-
-### 📖 ドキュメント
-- [ ] 使用方法ドキュメント作成
-- [ ] 設定ファイル仕様書作成
-- [ ] トラブルシューティングガイド
-- [ ] インストールガイド作成
-- [ ] 開発者向けドキュメント
-
-### 🚀 リリース準備（Homebrew配布）
-- [ ] Goビルド設定（マルチプラットフォーム対応）
-- [ ] Homebrew Formulaファイル作成
-- [ ] GitHub Releases設定
-- [ ] Homebrew tap リポジトリ作成
-- [ ] GoReleaser設定（自動ビルド・リリース）
-- [ ] CI/CDパイプライン構築（GitHub Actions）
-- [ ] リリースノート作成
-
-## 技術仕様
-
-### 開発言語・フレームワーク
-- **言語**: Go 1.24.4 (asdfで管理)
-- **CLIフレームワーク**: Cobra (github.com/spf13/cobra)
-- **設定ファイル**: JSON (encoding/json標準ライブラリ)
-- **ビルドツール**: GoReleaser
-- **配布**: Homebrew
-
-### プロジェクト構造
-```
-sproutee/
-├── cmd/sproutee/        # メインエントリーポイント
-│   └── main.go
-├── internal/            # 内部パッケージ
-│   ├── config/         # 設定ファイル管理
-│   ├── worktree/       # worktree操作
-│   └── copy/           # ファイルコピー機能
-├── pkg/                # 外部公開パッケージ
-├── testdata/           # テストデータ
-├── go.mod              # Go依存関係
-├── go.sum
-├── .goreleaser.yml     # リリース設定
-├── .tool-versions      # asdf用バージョン管理
-└── sproutee.rb         # Homebrew Formula
+**Node.js Project:**
+```json
+{
+  "copy_files": [
+    ".env",
+    ".env.local",
+    "package-lock.json",
+    "yarn.lock",
+    ".nvmrc"
+  ]
+}
 ```
 
-### 開発メモ
-- worktreeディレクトリ：`.git/sproutee-worktrees/[名前]_[ランダム文字列]/`
-- 設定ファイル名：`sproutee.json`
-- ランダム文字列：8文字程度の英数字
-- エラーハンドリング：Gitコマンドエラー、ファイルアクセスエラー等を適切に処理
-- Homebrew Formula名：`sproutee`
+**Go Project:**
+```json
+{
+  "copy_files": [
+    ".env",
+    "docker-compose.yml",
+    "Makefile",
+    ".tool-versions"
+  ]
+}
+```
 
-## インストール
+**Empty Configuration (no file copying):**
+```json
+{
+  "copy_files": []
+}
+```
 
-### Homebrew（リリース後）
+## Directory Structure
+
+Sproutee organizes worktrees in a clean, predictable structure:
+
+```
+your-repo/
+├── .git/
+│   ├── sproutee-worktrees/          # Sproutee worktrees (actual code)
+│   │   ├── feature_20241212_143022/
+│   │   └── bugfix_20241212_144055/
+│   └── worktrees/                   # Git metadata (managed by Git)
+│       ├── feature_20241212_143022/
+│       └── bugfix_20241212_144055/
+├── sproutee.json                    # Configuration file
+└── ...                             # Your project files
+```
+
+## Editor Integration
+
+Sproutee supports automatic editor launching for popular development environments:
+
+| Editor | Command | Platforms | Notes |
+|--------|---------|-----------|-------|
+| **Cursor** | `cursor` | macOS, Windows, Linux | AI-powered editor |
+| **VS Code** | `code` | macOS, Windows, Linux | Microsoft Visual Studio Code |
+| **Xcode** | `xed` | macOS only | Apple's IDE for iOS/macOS development |
+| **Android Studio** | `studio` / `open -a` | All platforms | Google's Android IDE |
+
+**Requirements:**
+- Respective command-line tools must be installed
+- Editors must be accessible from PATH
+
+## Examples
+
+### Typical Workflow
+
 ```bash
-brew tap [username]/sproutee
-brew install sproutee
+# 1. Set up project configuration
+cd my-project
+sproutee config init
+
+# 2. Edit sproutee.json to include necessary files
+echo '{
+  "copy_files": [
+    ".env",
+    "docker-compose.yml",
+    "package-lock.json"
+  ]
+}' > sproutee.json
+
+# 3. Create feature worktree
+sproutee create feature-user-auth main --vscode
+
+# 4. Work on feature...
+
+# 5. Create another worktree for hotfix
+sproutee create hotfix-critical-bug production --cursor
+
+# 6. View all worktrees
+sproutee list
+
+# 7. Clean up when done
+sproutee clean
 ```
 
-### 開発版
-```bash
-# Go 1.24.4をasdfでインストール
-asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
-asdf install golang 1.24.4
-asdf global golang 1.24.4
+### Advanced Usage
 
-# プロジェクトクローンしてビルド
-git clone https://github.com/[username]/sproutee.git
+```bash
+# Create worktree from specific commit
+sproutee create feature-revert abc123
+
+# Create worktree from remote branch
+sproutee create feature-collaboration origin/feature-branch
+
+# Clean up only clean worktrees
+sproutee clean
+# Then select: clean
+
+# Force cleanup without confirmations
+sproutee clean --force
+```
+
+## Development
+
+### Prerequisites
+
+- Go 1.21 or higher
+- Git 2.5 or higher
+
+### Building from Source
+
+```bash
+git clone https://github.com/daisuke310vvv/sproutee.git
 cd sproutee
+go mod download
 go build -o sproutee cmd/sproutee/main.go
 ```
 
-## 使用例
+### Running Tests
 
 ```bash
-# worktreeを作成してファイルをコピー
-sproutee create feature-123 develop
+# Run all tests
+go test ./...
 
-# 設定ファイルを初期化
-sproutee config init
+# Run tests with verbose output
+go test -v ./...
 
-# 作成済みworktreeを確認
-sproutee list
+# Run specific package tests
+go test ./internal/config
+go test ./internal/copy
+go test ./internal/worktree
 ```
 
-## ライセンス
+### Project Structure
 
-MIT License
+```
+sproutee/
+├── cmd/sproutee/           # Main application entry point
+│   └── main.go
+├── internal/               # Internal packages
+│   ├── config/            # Configuration management
+│   ├── copy/              # File copying operations
+│   └── worktree/          # Git worktree operations
+├── go.mod                 # Go module definition
+├── go.sum                 # Go module checksums
+└── README.md              # This file
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Development Setup
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+
+- Follow Go conventions and idioms
+- Add tests for new functionality
+- Update documentation as needed
+- Use meaningful commit messages
+
+## Troubleshooting
+
+### Common Issues
+
+**Error: "not inside a Git repository"**
+- Ensure you're running Sproutee from within a Git repository
+- Check that `.git` directory exists in current or parent directories
+
+**Error: "configuration file 'sproutee.json' not found"**
+- Run `sproutee config init` to create a default configuration
+- Ensure `sproutee.json` exists in current directory or parent directories
+
+**Editor fails to open**
+- Verify the editor's command-line tool is installed and in PATH
+- For VS Code: Install "code" command via Command Palette
+- For Cursor: Ensure "cursor" command is available
+- For Xcode: "xed" should be available with Xcode installation
+
+**Permission denied errors**
+- Ensure you have write permissions in the repository directory
+- Check file ownership and permissions for `.git` directory
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [Cobra](https://github.com/spf13/cobra) for CLI framework
+- Inspired by Git's powerful worktree functionality
+- Thanks to the open-source community for tools and inspiration
+
+---
+
+**Made with ❤️ by [daisuke310vvv](https://github.com/daisuke310vvv)**
