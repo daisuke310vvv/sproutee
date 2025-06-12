@@ -15,15 +15,7 @@ type Config struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		CopyFiles: []string{
-			".env",
-			".env.local",
-			"docker-compose.yml",
-			"package-lock.json",
-			"yarn.lock",
-			"Makefile",
-			".vscode/settings.json",
-		},
+		CopyFiles: []string{},
 	}
 }
 

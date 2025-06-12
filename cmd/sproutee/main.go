@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -64,6 +66,43 @@ automatically copied to the new worktree.`,
 			fmt.Fprintf(os.Stderr, "Warning: Failed to copy files: %v\n", err)
 		} else {
 			copyReport.PrintSummary()
+		}
+
+		// Get flags
+		openCursor, _ := cmd.Flags().GetBool("cursor")
+		openVSCode, _ := cmd.Flags().GetBool("vscode")
+		openXcode, _ := cmd.Flags().GetBool("xcode")
+		openAndroidStudio, _ := cmd.Flags().GetBool("android-studio")
+		
+		// Auto-open editor if any flag is set
+		if openCursor {
+			fmt.Println("\n🚀 Opening Cursor...")
+			if err := openInEditor(worktreePath, "cursor"); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to open Cursor: %v\n", err)
+			} else {
+				fmt.Println("✅ Cursor opened successfully")
+			}
+		} else if openVSCode {
+			fmt.Println("\n🚀 Opening VS Code...")
+			if err := openInEditor(worktreePath, "vscode"); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to open VS Code: %v\n", err)
+			} else {
+				fmt.Println("✅ VS Code opened successfully")
+			}
+		} else if openXcode {
+			fmt.Println("\n🚀 Opening Xcode...")
+			if err := openInEditor(worktreePath, "xcode"); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to open Xcode: %v\n", err)
+			} else {
+				fmt.Println("✅ Xcode opened successfully")
+			}
+		} else if openAndroidStudio {
+			fmt.Println("\n🚀 Opening Android Studio...")
+			if err := openInEditor(worktreePath, "android-studio"); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to open Android Studio: %v\n", err)
+			} else {
+				fmt.Println("✅ Android Studio opened successfully")
+			}
 		}
 	},
 }
@@ -324,7 +363,56 @@ var cleanCmd = &cobra.Command{
 	},
 }
 
+// openInEditor opens the specified directory in the chosen editor
+func openInEditor(path, editor string) error {
+	var cmd *exec.Cmd
+	
+	switch editor {
+	case "cursor":
+		switch runtime.GOOS {
+		case "darwin", "windows", "linux":
+			cmd = exec.Command("cursor", path)
+		default:
+			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		}
+	case "vscode":
+		switch runtime.GOOS {
+		case "darwin", "windows", "linux":
+			cmd = exec.Command("code", path)
+		default:
+			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		}
+	case "xcode":
+		switch runtime.GOOS {
+		case "darwin":
+			cmd = exec.Command("xed", path)
+		default:
+			return fmt.Errorf("Xcode is only available on macOS")
+		}
+	case "android-studio":
+		switch runtime.GOOS {
+		case "darwin":
+			cmd = exec.Command("open", "-a", "Android Studio", path)
+		case "windows":
+			cmd = exec.Command("studio", path)
+		case "linux":
+			cmd = exec.Command("studio.sh", path)
+		default:
+			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		}
+	default:
+		return fmt.Errorf("unsupported editor: %s", editor)
+	}
+	
+	return cmd.Start()
+}
+
 func init() {
+	createCmd.Flags().Bool("cursor", false, "Automatically open the created worktree in Cursor")
+	createCmd.Flags().Bool("vscode", false, "Automatically open the created worktree in VS Code")
+	createCmd.Flags().Bool("xcode", false, "Automatically open the created worktree in Xcode (macOS only)")
+	createCmd.Flags().Bool("android-studio", false, "Automatically open the created worktree in Android Studio")
+	
 	cleanCmd.Flags().Bool("dry-run", false, "Show what would be deleted without actually deleting")
 	cleanCmd.Flags().Bool("force", false, "Force deletion without confirmation for worktrees with uncommitted changes")
 	
