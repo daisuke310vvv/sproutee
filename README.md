@@ -121,25 +121,25 @@ sproutee help           # ヘルプ表示
 ## 開発TODO
 
 ### 🏗️ プロジェクト基盤（Golang）
-- [ ] asdfでGo 1.24.4の開発環境セットアップ
-- [ ] .tool-versionsファイル作成（`golang 1.24.4`）
-- [ ] `go mod init`でプロジェクト初期化
-- [ ] 標準的なGolangプロジェクト構造作成
-  - [ ] `cmd/sproutee/main.go`（エントリーポイント）
-  - [ ] `internal/`（内部パッケージ）
-  - [ ] `pkg/`（外部公開パッケージ）
-- [ ] go.mod依存関係設定
-- [ ] .gitignore作成（Go用）
-- [ ] Cobraライブラリ導入（CLI framework）
+- [x] asdfでGo 1.24.4の開発環境セットアップ
+- [x] .tool-versionsファイル作成（`golang 1.24.4`）
+- [x] `go mod init`でプロジェクト初期化
+- [x] 標準的なGolangプロジェクト構造作成
+  - [x] `cmd/sproutee/main.go`（エントリーポイント）
+  - [x] `internal/`（内部パッケージ）
+  - [x] `pkg/`（外部公開パッケージ）
+- [x] go.mod依存関係設定
+- [x] .gitignore作成（Go用）
+- [x] Cobraライブラリ導入（CLI framework）
 
 ### ⚙️ 設定ファイル機能
-- [ ] JSON設定ファイル構造設計
-- [ ] encoding/json 標準ライブラリを使用
-- [ ] 設定ファイル読み込み機能実装
-- [ ] 設定ファイル作成コマンド実装（`sproutee config init`）
-- [ ] 設定ファイル検証機能実装
-- [ ] デフォルト設定ファイル（sproutee.json）作成
-- [ ] 設定ファイルパス検索機能（カレントディレクトリ→親ディレクトリ）
+- [x] JSON設定ファイル構造設計
+- [x] encoding/json 標準ライブラリを使用
+- [x] 設定ファイル読み込み機能実装
+- [x] 設定ファイル作成コマンド実装（`sproutee config init`）
+- [x] 設定ファイル検証機能実装
+- [x] デフォルト設定ファイル（sproutee.json）作成
+- [x] 設定ファイルパス検索機能（カレントディレクトリ→親ディレクトリ）
 
 ### 🌿 Worktree管理機能
 - [ ] Gitリポジトリ検出機能
@@ -158,12 +158,12 @@ sproutee help           # ヘルプ表示
 - [ ] コピー結果レポート機能
 
 ### 🖥️ CLI機能
-- [ ] コマンドライン引数パース
+- [x] コマンドライン引数パース
 - [ ] `create`コマンド実装
-- [ ] `config`サブコマンド実装
-- [ ] `list`コマンド実装
-- [ ] `clean`コマンド実装
-- [ ] ヘルプメッセージ実装
+- [x] `config`サブコマンド実装（`init`, `list`）
+- [x] `list`コマンド実装
+- [x] `clean`コマンド実装
+- [x] ヘルプメッセージ実装
 - [ ] エラーメッセージ改善
 
 ### 🧪 テスト・品質

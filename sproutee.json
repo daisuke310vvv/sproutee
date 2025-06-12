@@ -1,0 +1,11 @@
+{
+  "copy_files": [
+    ".env",
+    ".env.local",
+    "docker-compose.yml",
+    "package-lock.json",
+    "yarn.lock",
+    "Makefile",
+    ".vscode/settings.json"
+  ]
+}
