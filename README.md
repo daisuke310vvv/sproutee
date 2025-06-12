@@ -24,8 +24,20 @@ Sproutee streamlines your Git workflow by automating worktree creation and intel
 
 ### Installation
 
+#### Homebrew (Recommended)
+
 ```bash
-# Build from source
+# Add the tap
+brew tap daisuke310vvv/sproutee
+
+# Install sproutee
+brew install sproutee
+```
+
+#### Build from Source
+
+```bash
+# Clone and build
 git clone https://github.com/daisuke310vvv/sproutee.git
 cd sproutee
 go build -o sproutee cmd/sproutee/main.go
@@ -33,6 +45,10 @@ go build -o sproutee cmd/sproutee/main.go
 # Move to your PATH (optional)
 mv sproutee /usr/local/bin/
 ```
+
+#### Download Pre-built Binaries
+
+Download the latest release from [GitHub Releases](https://github.com/daisuke310vvv/sproutee/releases).
 
 ### Basic Usage
 

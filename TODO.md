@@ -189,8 +189,12 @@ sproutee help           # ヘルプ表示
 - [x] CI/CDパイプライン構築（GitHub Actions）
 - [x] golangci-lint設定
 - [x] MITライセンス追加
-- [ ] Homebrew Formulaファイル作成
-- [ ] Homebrew tap リポジトリ作成
+- [x] Homebrew Formulaファイル作成
+- [x] Homebrew tap リポジトリ作成（homebrew-sproutee）
+- [x] GoReleaserにHomebrew自動更新設定追加
+- [x] READMEにHomebrew インストール手順追加
+- [ ] 初回リリース実行（v0.1.0）
+- [ ] Homebrewインストールテスト
 - [ ] リリースノート作成
 
 ## 技術仕様
@@ -279,6 +283,7 @@ sproutee clean
 - ✅ 完全なリリースインフラ（GoReleaser + GitHub Actions）
 - ✅ 自動CI/CD パイプライン
 - ✅ コード品質チェック（golangci-lint）
+- ✅ Homebrew対応（自動Formula更新）
 
 ## リリース準備状況
 
@@ -289,18 +294,30 @@ sproutee clean
 - プロフェッショナルドキュメント
 - リリースインフラ設定
 - CI/CD パイプライン
+- Homebrew対応（Formula + Tap）
 
 ### 🚀 v0.1.0 リリース準備完了
-タグ作成でGitHub Releasesに自動配布：
+タグ作成でGitHub Releases + Homebrew配布開始：
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
+### 🍺 Homebrewインストール（リリース後）
+```bash
+brew tap daisuke310vvv/sproutee
+brew install sproutee
+```
+
+### 📋 次のステップ
+1. **初回リリース実行**: `git tag v0.1.0 && git push origin v0.1.0`
+2. **自動配布確認**: GitHub Actions実行とHomebrew Formula更新
+3. **インストールテスト**: `brew tap daisuke310vvv/sproutee && brew install sproutee`
+
 ### 📋 残りタスク（任意）
-- Homebrew Formula作成（配布強化）
 - 統合テスト追加
 - エラーハンドリング強化
+- パフォーマンステスト
 
 ## ライセンス
 
