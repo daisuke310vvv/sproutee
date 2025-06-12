@@ -13,22 +13,13 @@ func TestDefaultConfig(t *testing.T) {
 		t.Fatal("DefaultConfig() returned nil")
 	}
 	
-	if len(config.CopyFiles) == 0 {
-		t.Error("DefaultConfig() should contain copy files")
+	if config.CopyFiles == nil {
+		t.Error("DefaultConfig() CopyFiles should not be nil")
 	}
 	
-	expectedFiles := []string{".env", ".env.local", "docker-compose.yml"}
-	for _, expectedFile := range expectedFiles {
-		found := false
-		for _, file := range config.CopyFiles {
-			if file == expectedFile {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected file %s not found in default config", expectedFile)
-		}
+	// Default config should now have empty copy_files array
+	if len(config.CopyFiles) != 0 {
+		t.Errorf("DefaultConfig() should have empty copy_files, got %d files", len(config.CopyFiles))
 	}
 }
 
@@ -194,8 +185,12 @@ func TestCreateDefaultConfigFile(t *testing.T) {
 		t.Fatalf("Failed to load created default config: %v", err)
 	}
 	
-	if len(config.CopyFiles) == 0 {
-		t.Error("Default config should contain copy files")
+	if config.CopyFiles == nil {
+		t.Error("Default config CopyFiles should not be nil")
+	}
+	
+	if len(config.CopyFiles) != 0 {
+		t.Errorf("Default config should have empty copy_files, got %d files", len(config.CopyFiles))
 	}
 	
 	err = CreateDefaultConfigFile(configPath)

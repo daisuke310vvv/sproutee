@@ -164,6 +164,7 @@ sproutee help           # ヘルプ表示
 - [x] `list`コマンド実装
 - [x] `clean`コマンド実装
 - [x] ヘルプメッセージ実装
+- [x] マルチエディタ自動起動機能（Cursor, VS Code, Xcode, Android Studio）
 - [ ] エラーメッセージ改善
 
 ### 🧪 テスト・品質
@@ -174,11 +175,12 @@ sproutee help           # ヘルプ表示
 - [ ] マルチプラットフォーム対応確認
 
 ### 📖 ドキュメント
-- [ ] 使用方法ドキュメント作成
+- [x] 使用方法ドキュメント作成（README.md）
+- [x] プロフェッショナルなOSS向けREADME作成
+- [x] インストールガイド作成
+- [x] 開発者向けドキュメント
+- [x] トラブルシューティングガイド
 - [ ] 設定ファイル仕様書作成
-- [ ] トラブルシューティングガイド
-- [ ] インストールガイド作成
-- [ ] 開発者向けドキュメント
 
 ### 🚀 リリース準備（Homebrew配布）
 - [ ] Goビルド設定（マルチプラットフォーム対応）
@@ -217,9 +219,11 @@ sproutee/
 ```
 
 ### 開発メモ
-- worktreeディレクトリ：`.git/sproutee-worktrees/[名前]_[ランダム文字列]/`
+- worktreeディレクトリ：`.git/sproutee-worktrees/[名前]_[タイムスタンプ]/`
 - 設定ファイル名：`sproutee.json`
-- ランダム文字列：8文字程度の英数字
+- タイムスタンプ形式：`20060102_150405`（YYYYMMDD_HHMMSS）
+- デフォルト設定：空の`copy_files`配列
+- エディタ自動起動：`--cursor`, `--vscode`, `--xcode`, `--android-studio`フラグ
 - エラーハンドリング：Gitコマンドエラー、ファイルアクセスエラー等を適切に処理
 - Homebrew Formula名：`sproutee`
 
@@ -247,15 +251,29 @@ go build -o sproutee cmd/sproutee/main.go
 ## 使用例
 
 ```bash
-# worktreeを作成してファイルをコピー
-sproutee create feature-123 develop
-
 # 設定ファイルを初期化
 sproutee config init
 
-# 作成済みworktreeを確認
+# worktreeを作成してファイルをコピー
+sproutee create feature-123 develop
+
+# エディタと同時に起動
+sproutee create feature-auth main --cursor
+
+# 作成済みworktree一覧表示
 sproutee list
+
+# 安全なworktreeクリーンアップ
+sproutee clean
 ```
+
+## 新機能
+- ✅ マルチエディタ自動起動（Cursor, VS Code, Xcode, Android Studio）
+- ✅ タイムスタンプベースのディレクトリ命名
+- ✅ 空のデフォルト設定
+- ✅ 包括的なユニットテスト
+- ✅ プロフェッショナルなOSS向けドキュメント
+- ✅ 混乱回避のための`.git/sproutee-worktrees/`ディレクトリ使用
 
 ## ライセンス
 
