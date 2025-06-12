@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/daisuke310vvv/sproutee/internal/config"
+	"github.com/daisuke310vvv/sproutee/internal/copy"
+	"github.com/daisuke310vvv/sproutee/internal/worktree"
 	"github.com/spf13/cobra"
 )
 
@@ -36,8 +38,30 @@ automatically copied to the new worktree.`,
 		if len(args) > 1 {
 			branch = args[1]
 		}
-		fmt.Printf("Creating worktree '%s' from branch '%s'\n", name, branch)
-		fmt.Println("This feature is coming soon!")
+
+		manager, err := worktree.NewManager()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Creating worktree '%s' from branch '%s'...\n", name, branch)
+		
+		worktreePath, err := manager.CreateWorktree(name, branch)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("✅ Worktree created successfully at: %s\n", worktreePath)
+		
+		fmt.Println("\n📁 Copying configured files...")
+		copyReport, err := copy.CopyFilesToWorktree(manager.RepoRoot, worktreePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to copy files: %v\n", err)
+		} else {
+			copyReport.PrintSummary()
+		}
 	},
 }
 
@@ -94,8 +118,34 @@ var listCmd = &cobra.Command{
 	Short: "List existing worktrees",
 	Long:  "Display all existing worktrees created by Sproutee.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Existing worktrees:")
-		fmt.Println("This feature is coming soon!")
+		manager, err := worktree.NewManager()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		worktrees, err := manager.ListWorktrees()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		if len(worktrees) == 0 {
+			fmt.Println("No worktrees found.")
+			return
+		}
+
+		fmt.Printf("Found %d worktree(s):\n", len(worktrees))
+		for i, wt := range worktrees {
+			fmt.Printf("  %d. %s", i+1, wt.Path)
+			if wt.Branch != "" {
+				fmt.Printf(" (branch: %s)", wt.Branch)
+			}
+			if wt.Commit != "" {
+				fmt.Printf(" [%s]", wt.Commit[:8])
+			}
+			fmt.Println()
+		}
 	},
 }
 

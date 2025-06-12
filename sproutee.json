@@ -6,6 +6,8 @@
     "package-lock.json",
     "yarn.lock",
     "Makefile",
-    ".vscode/settings.json"
+    ".vscode/settings.json",
+    "test-copy.txt",
+    "sproutee.json"
   ]
 }
