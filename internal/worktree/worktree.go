@@ -72,7 +72,62 @@ func (m *Manager) GetWorktreeBasePath() string {
 	return filepath.Join(m.RepoRoot, WorktreeDir)
 }
 
+func (m *Manager) branchExists(branch string) bool {
+	cmd := exec.Command("git", "rev-parse", "--verify", branch)
+	cmd.Dir = m.RepoRoot
+	return cmd.Run() == nil
+}
+
+func (m *Manager) remoteBranchExists(branch string) bool {
+	cmd := exec.Command("git", "rev-parse", "--verify", fmt.Sprintf("origin/%s", branch))
+	cmd.Dir = m.RepoRoot
+	return cmd.Run() == nil
+}
+
+func (m *Manager) fetchRemoteBranch(branch string) error {
+	cmd := exec.Command("git", "fetch", "origin", fmt.Sprintf("%s:%s", branch, branch))
+	cmd.Dir = m.RepoRoot
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to fetch remote branch: %w\nOutput: %s", err, string(output))
+	}
+	return nil
+}
+
+func (m *Manager) createNewBranch(branch string) error {
+	cmd := exec.Command("git", "checkout", "-b", branch)
+	cmd.Dir = m.RepoRoot
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to create new branch: %w\nOutput: %s", err, string(output))
+	}
+	
+	cmd = exec.Command("git", "checkout", "-")
+	cmd.Dir = m.RepoRoot
+	cmd.Run()
+	
+	return nil
+}
+
+func (m *Manager) ensureBranchExists(branch string) error {
+	if m.branchExists(branch) {
+		return nil
+	}
+	
+	if m.remoteBranchExists(branch) {
+		return m.fetchRemoteBranch(branch)
+	}
+	
+	return m.createNewBranch(branch)
+}
+
 func (m *Manager) CreateWorktree(name, branch string) (string, error) {
+	if err := m.ensureBranchExists(branch); err != nil {
+		return "", fmt.Errorf("failed to ensure branch exists: %w", err)
+	}
+
 	dirName, err := m.GenerateWorktreeDirName(name)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate directory name: %w", err)
