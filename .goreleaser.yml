@@ -55,18 +55,18 @@ changelog:
       - '^docs:'
       - '^test:'
 
-# brews:
-#   - name: sproutee
-#     repository:
-#       owner: daisuke310vvv
-#       name: homebrew-sproutee
-#     homepage: https://github.com/daisuke310vvv/sproutee
-#     description: "A powerful CLI tool for efficient Git worktree management with automated file copying and multi-editor integration"
-#     license: MIT
-#     install: |
-#       bin.install "sproutee"
-#     test: |
-#       system "#{bin}/sproutee", "--help"
+brews:
+  - name: sproutee
+    repository:
+      owner: daisuke310vvv
+      name: homebrew-sproutee
+    homepage: https://github.com/daisuke310vvv/sproutee
+    description: "A powerful CLI tool for efficient Git worktree management with automated file copying and multi-editor integration"
+    license: MIT
+    install: |
+      bin.install "sproutee"
+    test: |
+      system "#{bin}/sproutee", "--help"
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
