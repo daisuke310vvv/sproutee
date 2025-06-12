@@ -30,7 +30,7 @@ The project follows standard Go project structure:
 Key components:
 - **CLI Framework**: Cobra (github.com/spf13/cobra)
 - **Configuration**: JSON files using standard library
-- **Worktree Management**: Git worktree operations in `.git/worktree/` directory
+- **Worktree Management**: Git worktree operations in `.git/sproutee-worktrees/` directory
 - **File Operations**: Automated file copying based on configuration
 
 ## Configuration

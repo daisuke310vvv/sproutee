@@ -10,7 +10,7 @@ Sprouteeは、Gitリポジトリ内でworktreeを効率的に管理し、必要�
 
 ### 1. Git Worktree作成機能
 - 現在のリポジトリで`git worktree add`を実行
-- worktreeの保存先：`.git/worktree/`ディレクトリ内
+- worktreeの保存先：`.git/sproutee-worktrees/`ディレクトリ内
 - ディレクトリ名：`[指定名]_[ランダム文字列]`の形式
 
 ### 2. ファイルコピー機能
@@ -146,7 +146,7 @@ sproutee help           # ヘルプ表示
 - [x] ランダム文字列生成機能
 - [x] ディレクトリ名生成ロジック
 - [x] `git worktree add`コマンド実行機能
-- [x] `.git/worktree/`ディレクトリ管理
+- [x] `.git/sproutee-worktrees/`ディレクトリ管理
 - [x] Worktree作成コマンド実装
 
 ### 📁 ファイルコピー機能
@@ -217,7 +217,7 @@ sproutee/
 ```
 
 ### 開発メモ
-- worktreeディレクトリ：`.git/worktree/[名前]_[ランダム文字列]/`
+- worktreeディレクトリ：`.git/sproutee-worktrees/[名前]_[ランダム文字列]/`
 - 設定ファイル名：`sproutee.json`
 - ランダム文字列：8文字程度の英数字
 - エラーハンドリング：Gitコマンドエラー、ファイルアクセスエラー等を適切に処理

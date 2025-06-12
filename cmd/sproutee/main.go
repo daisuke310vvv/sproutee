@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 copies specified files to new worktrees based on configuration.
 
 It helps manage multiple branches efficiently by creating worktrees
-in .git/worktree/ directory and automatically copying configured files.`,
+in .git/sproutee-worktrees/ directory and automatically copying configured files.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Sproutee - Git Worktree Management Tool")
 		fmt.Println("Use 'sproutee --help' for more information.")

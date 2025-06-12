@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	WorktreeDir = ".git/worktree"
+	WorktreeDir = ".git/sproutee-worktrees"
 )
 
 type Manager struct {
