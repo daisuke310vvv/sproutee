@@ -73,32 +73,63 @@ automatically copied to the new worktree.`,
 		openVSCode, _ := cmd.Flags().GetBool("vscode")
 		openXcode, _ := cmd.Flags().GetBool("xcode")
 		openAndroidStudio, _ := cmd.Flags().GetBool("android-studio")
+		customDir, _ := cmd.Flags().GetString("dir")
+		
+		// Determine target path for editor
+		targetPath := worktreePath
+		if customDir != "" {
+			if !filepath.IsAbs(customDir) {
+				// Relative path: resolve relative to worktree directory
+				targetPath = filepath.Join(worktreePath, customDir)
+			} else {
+				// Absolute path: use as-is
+				targetPath = customDir
+			}
+			
+			// Check if the target path exists
+			if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+				fmt.Printf("Warning: Directory '%s' does not exist, using worktree root instead\n", targetPath)
+				targetPath = worktreePath
+			}
+		}
 		
 		// Auto-open editor if any flag is set
 		if openCursor {
 			fmt.Println("\n🚀 Opening Cursor...")
-			if err := openInEditor(worktreePath, "cursor"); err != nil {
+			if customDir != "" {
+				fmt.Printf("📁 Target directory: %s\n", targetPath)
+			}
+			if err := openInEditor(targetPath, "cursor"); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: Failed to open Cursor: %v\n", err)
 			} else {
 				fmt.Println("✅ Cursor opened successfully")
 			}
 		} else if openVSCode {
 			fmt.Println("\n🚀 Opening VS Code...")
-			if err := openInEditor(worktreePath, "vscode"); err != nil {
+			if customDir != "" {
+				fmt.Printf("📁 Target directory: %s\n", targetPath)
+			}
+			if err := openInEditor(targetPath, "vscode"); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: Failed to open VS Code: %v\n", err)
 			} else {
 				fmt.Println("✅ VS Code opened successfully")
 			}
 		} else if openXcode {
 			fmt.Println("\n🚀 Opening Xcode...")
-			if err := openInEditor(worktreePath, "xcode"); err != nil {
+			if customDir != "" {
+				fmt.Printf("📁 Target directory: %s\n", targetPath)
+			}
+			if err := openInEditor(targetPath, "xcode"); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: Failed to open Xcode: %v\n", err)
 			} else {
 				fmt.Println("✅ Xcode opened successfully")
 			}
 		} else if openAndroidStudio {
 			fmt.Println("\n🚀 Opening Android Studio...")
-			if err := openInEditor(worktreePath, "android-studio"); err != nil {
+			if customDir != "" {
+				fmt.Printf("📁 Target directory: %s\n", targetPath)
+			}
+			if err := openInEditor(targetPath, "android-studio"); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: Failed to open Android Studio: %v\n", err)
 			} else {
 				fmt.Println("✅ Android Studio opened successfully")
@@ -412,6 +443,7 @@ func init() {
 	createCmd.Flags().Bool("vscode", false, "Automatically open the created worktree in VS Code")
 	createCmd.Flags().Bool("xcode", false, "Automatically open the created worktree in Xcode (macOS only)")
 	createCmd.Flags().Bool("android-studio", false, "Automatically open the created worktree in Android Studio")
+	createCmd.Flags().String("dir", "", "Specify directory to open in editor (absolute or relative path)")
 	
 	cleanCmd.Flags().Bool("dry-run", false, "Show what would be deleted without actually deleting")
 	cleanCmd.Flags().Bool("force", false, "Force deletion without confirmation for worktrees with uncommitted changes")

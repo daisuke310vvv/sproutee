@@ -14,7 +14,7 @@ Sproutee streamlines your Git workflow by automating worktree creation and intel
 
 - 🚀 **Automated Worktree Creation**: Creates Git worktrees with timestamp-based naming
 - 📁 **Smart File Copying**: Automatically copies configured files to new worktrees
-- 🎯 **Multi-Editor Support**: Launch Cursor, VS Code, Xcode, or Android Studio automatically
+- 🎯 **Multi-Editor Support**: Launch Cursor, VS Code, Xcode, or Android Studio automatically with custom directory targeting
 - ⚙️ **Flexible Configuration**: JSON-based configuration for file management
 - 🧹 **Safe Cleanup**: Interactive worktree cleanup with uncommitted change detection
 - 🔍 **Status Monitoring**: Track worktree status and changes
@@ -62,6 +62,9 @@ sproutee create feature-auth main
 # Create worktree and open in VS Code
 sproutee create bugfix-login develop --vscode
 
+# Create worktree and open specific directory in editor
+sproutee create feature-frontend main --cursor --dir ./src/frontend
+
 # List all worktrees
 sproutee list
 
@@ -84,6 +87,10 @@ sproutee create feature-auth main --cursor    # Open in Cursor
 sproutee create hotfix-bug develop --vscode   # Open in VS Code
 sproutee create ios-feature main --xcode      # Open in Xcode (macOS only)
 sproutee create android-fix main --android-studio  # Open in Android Studio
+
+# Open specific directory in editor
+sproutee create feature-api main --cursor --dir ./backend
+sproutee create ui-components main --vscode --dir ./src/components
 ```
 
 **Options:**
@@ -91,6 +98,7 @@ sproutee create android-fix main --android-studio  # Open in Android Studio
 - `--vscode`: Open worktree in VS Code
 - `--xcode`: Open worktree in Xcode (macOS only)
 - `--android-studio`: Open worktree in Android Studio
+- `--dir <path>`: Specify directory to open in editor (absolute or relative path)
 
 ### `sproutee config`
 
@@ -221,6 +229,27 @@ Sproutee supports automatic editor launching for popular development environment
 - Respective command-line tools must be installed
 - Editors must be accessible from PATH
 
+### Directory Targeting
+
+The `--dir` option allows you to specify which directory to open in your editor:
+
+```bash
+# Open specific subdirectory (relative path)
+sproutee create feature-backend main --cursor --dir ./backend
+
+# Open specific subdirectory (absolute path)
+sproutee create feature-docs main --vscode --dir /path/to/documentation
+
+# Without --dir, opens the worktree root (default behavior)
+sproutee create feature main --cursor
+```
+
+**Behavior:**
+- **Relative paths**: Resolved relative to the worktree directory
+- **Absolute paths**: Used as-is
+- **Non-existent paths**: Falls back to worktree root with a warning
+- **Without --dir**: Opens the worktree root directory (default)
+
 ## Examples
 
 ### Typical Workflow
@@ -242,9 +271,12 @@ echo '{
 # 3. Create feature worktree
 sproutee create feature-user-auth main --vscode
 
-# 4. Work on feature...
+# 4. Create frontend-specific worktree
+sproutee create feature-ui main --cursor --dir ./frontend
 
-# 5. Create another worktree for hotfix
+# 5. Work on feature...
+
+# 6. Create another worktree for hotfix
 sproutee create hotfix-critical-bug production --cursor
 
 # 6. View all worktrees
@@ -262,6 +294,13 @@ sproutee create feature-revert abc123
 
 # Create worktree from remote branch
 sproutee create feature-collaboration origin/feature-branch
+
+# Open specific subdirectory in editor
+sproutee create backend-refactor main --vscode --dir ./api
+sproutee create mobile-app main --android-studio --dir ./mobile
+
+# Use absolute paths
+sproutee create docs-update main --cursor --dir /path/to/docs
 
 # Clean up only clean worktrees
 sproutee clean
