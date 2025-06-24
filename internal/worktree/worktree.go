@@ -79,13 +79,13 @@ func (m *Manager) branchExists(branch string) bool {
 }
 
 func (m *Manager) remoteBranchExists(branch string) bool {
-	cmd := exec.Command("git", "rev-parse", "--verify", fmt.Sprintf("origin/%s", branch))
+	cmd := exec.Command("git", "rev-parse", "--verify", fmt.Sprintf("origin/%s", branch)) // #nosec G204
 	cmd.Dir = m.RepoRoot
 	return cmd.Run() == nil
 }
 
 func (m *Manager) fetchRemoteBranch(branch string) error {
-	cmd := exec.Command("git", "fetch", "origin", fmt.Sprintf("%s:%s", branch, branch))
+	cmd := exec.Command("git", "fetch", "origin", fmt.Sprintf("%s:%s", branch, branch)) // #nosec G204
 	cmd.Dir = m.RepoRoot
 
 	output, err := cmd.CombinedOutput()
@@ -134,7 +134,7 @@ func (m *Manager) CreateWorktree(name, branch string) (string, error) {
 	}
 
 	worktreeBasePath := m.GetWorktreeBasePath()
-	if err := os.MkdirAll(worktreeBasePath, 0755); err != nil {
+	if err := os.MkdirAll(worktreeBasePath, 0o755); err != nil {
 		return "", fmt.Errorf("failed to create worktree base directory: %w", err)
 	}
 

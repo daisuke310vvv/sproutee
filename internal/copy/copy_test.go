@@ -12,7 +12,7 @@ func TestFileExists(t *testing.T) {
 	tempDir := t.TempDir()
 
 	existingFile := filepath.Join(tempDir, "existing.txt")
-	if err := os.WriteFile(existingFile, []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(existingFile, []byte("test"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -31,7 +31,7 @@ func TestCopyFile(t *testing.T) {
 
 	srcFile := filepath.Join(tempDir, "source.txt")
 	testContent := "test file content"
-	if err := os.WriteFile(srcFile, []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(srcFile, []byte(testContent), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -63,7 +63,7 @@ func TestCopyFileWithStructure(t *testing.T) {
 	srcRoot := filepath.Join(tempDir, "src")
 	targetRoot := filepath.Join(tempDir, "target")
 
-	if err := os.MkdirAll(filepath.Join(srcRoot, "subdir"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(srcRoot, "subdir"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -71,7 +71,7 @@ func TestCopyFileWithStructure(t *testing.T) {
 	srcFile := filepath.Join(srcRoot, relativePath)
 	testContent := "structured file content"
 
-	if err := os.WriteFile(srcFile, []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(srcFile, []byte(testContent), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -107,14 +107,14 @@ func TestCopyFilesFromConfig(t *testing.T) {
 	srcRoot := filepath.Join(tempDir, "src")
 	targetRoot := filepath.Join(tempDir, "target")
 
-	if err := os.MkdirAll(srcRoot, 0755); err != nil {
+	if err := os.MkdirAll(srcRoot, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
 	existingFile := ".env"
 	nonExistentFile := ".nonexistent"
 
-	if err := os.WriteFile(filepath.Join(srcRoot, existingFile), []byte("TEST=value"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(srcRoot, existingFile), []byte("TEST=value"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 

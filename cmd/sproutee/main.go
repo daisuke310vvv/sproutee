@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	osLinux = "linux"
+	osLinux  = "linux"
+	osDarwin = "darwin"
 )
 
 var rootCmd = &cobra.Command{
@@ -28,7 +29,7 @@ copies specified files to new worktrees based on configuration.
 
 It helps manage multiple branches efficiently by creating worktrees
 in .git/sproutee-worktrees/ directory and automatically copying configured files.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("Sproutee - Git Worktree Management Tool")
 		fmt.Println("Use 'sproutee --help' for more information.")
 	},
@@ -149,7 +150,7 @@ var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize configuration file",
 	Long:  "Create a default sproutee.json configuration file in the current directory.",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		wd, err := os.Getwd()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Failed to get current directory: %v\n", err)
@@ -172,7 +173,7 @@ var configListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Show configuration",
 	Long:  "Display the current configuration settings.",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		cfg, err := config.LoadConfigFromCurrentDir()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -191,7 +192,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List existing worktrees",
 	Long:  "Display all existing worktrees created by Sproutee.",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		manager, err := worktree.NewManager()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -402,28 +403,28 @@ func openInEditor(path, editor string) error {
 	switch editor {
 	case "cursor":
 		switch runtime.GOOS {
-		case "darwin", "windows", osLinux:
+		case osDarwin, "windows", osLinux:
 			cmd = exec.Command("cursor", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 		}
 	case "vscode":
 		switch runtime.GOOS {
-		case "darwin", "windows", osLinux:
+		case osDarwin, "windows", osLinux:
 			cmd = exec.Command("code", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 		}
 	case "xcode":
 		switch runtime.GOOS {
-		case "darwin":
+		case osDarwin:
 			cmd = exec.Command("xed", path)
 		default:
 			return fmt.Errorf("Xcode is only available on macOS")
 		}
 	case "android-studio":
 		switch runtime.GOOS {
-		case "darwin":
+		case osDarwin:
 			cmd = exec.Command("open", "-a", "Android Studio", path)
 		case "windows":
 			cmd = exec.Command("studio", path)

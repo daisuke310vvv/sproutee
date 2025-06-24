@@ -66,12 +66,12 @@ func TestFindConfigFile(t *testing.T) {
 	tempDir := t.TempDir()
 
 	subDir := filepath.Join(tempDir, "subdir")
-	if err := os.MkdirAll(subDir, 0755); err != nil {
+	if err := os.MkdirAll(subDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
 	configPath := filepath.Join(tempDir, ConfigFileName)
-	if err := os.WriteFile(configPath, []byte(`{"copy_files": []}`), 0644); err != nil {
+	if err := os.WriteFile(configPath, []byte(`{"copy_files": []}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -123,7 +123,7 @@ func TestLoadConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			configPath := filepath.Join(tempDir, "test_"+tt.name+".json")
-			if err := os.WriteFile(configPath, []byte(tt.content), 0644); err != nil {
+			if err := os.WriteFile(configPath, []byte(tt.content), 0o644); err != nil {
 				t.Fatal(err)
 			}
 

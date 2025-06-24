@@ -26,7 +26,7 @@ func TestFindGitRepository(t *testing.T) {
 	tempDir := t.TempDir()
 
 	gitDir := filepath.Join(tempDir, ".git")
-	if err := os.MkdirAll(gitDir, 0755); err != nil {
+	if err := os.MkdirAll(gitDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
