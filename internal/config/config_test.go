@@ -8,15 +8,15 @@ import (
 
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
-	
+
 	if config == nil {
 		t.Fatal("DefaultConfig() returned nil")
 	}
-	
+
 	if config.CopyFiles == nil {
 		t.Error("DefaultConfig() CopyFiles should not be nil")
 	}
-	
+
 	// Default config should now have empty copy_files array
 	if len(config.CopyFiles) != 0 {
 		t.Errorf("DefaultConfig() should have empty copy_files, got %d files", len(config.CopyFiles))
@@ -64,26 +64,26 @@ func TestConfigValidate(t *testing.T) {
 
 func TestFindConfigFile(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	subDir := filepath.Join(tempDir, "subdir")
 	if err := os.MkdirAll(subDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	configPath := filepath.Join(tempDir, ConfigFileName)
 	if err := os.WriteFile(configPath, []byte(`{"copy_files": []}`), 0644); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	foundPath, err := FindConfigFile(subDir)
 	if err != nil {
 		t.Fatalf("FindConfigFile() error = %v", err)
 	}
-	
+
 	if foundPath != configPath {
 		t.Errorf("FindConfigFile() = %v, want %v", foundPath, configPath)
 	}
-	
+
 	emptyDir := t.TempDir()
 	_, err = FindConfigFile(emptyDir)
 	if err == nil {
@@ -93,7 +93,7 @@ func TestFindConfigFile(t *testing.T) {
 
 func TestLoadConfig(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	tests := []struct {
 		name     string
 		content  string
@@ -126,13 +126,13 @@ func TestLoadConfig(t *testing.T) {
 			if err := os.WriteFile(configPath, []byte(tt.content), 0644); err != nil {
 				t.Fatal(err)
 			}
-			
+
 			config, err := LoadConfig(configPath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if !tt.wantErr && tt.validate != nil && !tt.validate(config) {
 				t.Error("LoadConfig() validation failed")
 			}
@@ -143,25 +143,25 @@ func TestLoadConfig(t *testing.T) {
 func TestSaveConfig(t *testing.T) {
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "test_config.json")
-	
+
 	config := &Config{
 		CopyFiles: []string{".env", "docker-compose.yml"},
 	}
-	
+
 	err := SaveConfig(config, configPath)
 	if err != nil {
 		t.Fatalf("SaveConfig() error = %v", err)
 	}
-	
+
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		t.Error("Config file was not created")
 	}
-	
+
 	loadedConfig, err := LoadConfig(configPath)
 	if err != nil {
 		t.Fatalf("Failed to load saved config: %v", err)
 	}
-	
+
 	if len(loadedConfig.CopyFiles) != len(config.CopyFiles) {
 		t.Error("Saved config does not match original")
 	}
@@ -170,29 +170,29 @@ func TestSaveConfig(t *testing.T) {
 func TestCreateDefaultConfigFile(t *testing.T) {
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "new_config.json")
-	
+
 	err := CreateDefaultConfigFile(configPath)
 	if err != nil {
 		t.Fatalf("CreateDefaultConfigFile() error = %v", err)
 	}
-	
+
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		t.Error("Default config file was not created")
 	}
-	
+
 	config, err := LoadConfig(configPath)
 	if err != nil {
 		t.Fatalf("Failed to load created default config: %v", err)
 	}
-	
+
 	if config.CopyFiles == nil {
 		t.Error("Default config CopyFiles should not be nil")
 	}
-	
+
 	if len(config.CopyFiles) != 0 {
 		t.Errorf("Default config should have empty copy_files, got %d files", len(config.CopyFiles))
 	}
-	
+
 	err = CreateDefaultConfigFile(configPath)
 	if err == nil {
 		t.Error("CreateDefaultConfigFile() should return error when file already exists")

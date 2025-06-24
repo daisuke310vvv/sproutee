@@ -16,6 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	osLinux = "linux"
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "sproutee",
 	Short: "A CLI tool for managing Git worktrees efficiently",
@@ -48,7 +52,7 @@ configuration will be automatically copied to the new worktree.`,
 		}
 
 		fmt.Printf("Creating worktree '%s' with branch '%s'...\n", name, branch)
-		
+
 		worktreePath, err := manager.CreateWorktree(name, branch)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -56,7 +60,7 @@ configuration will be automatically copied to the new worktree.`,
 		}
 
 		fmt.Printf("✅ Worktree created successfully at: %s\n", worktreePath)
-		
+
 		fmt.Println("\n📁 Copying configured files...")
 		copyReport, err := copy.CopyFilesToWorktree(manager.RepoRoot, worktreePath)
 		if err != nil {
@@ -71,7 +75,7 @@ configuration will be automatically copied to the new worktree.`,
 		openXcode, _ := cmd.Flags().GetBool("xcode")
 		openAndroidStudio, _ := cmd.Flags().GetBool("android-studio")
 		customDir, _ := cmd.Flags().GetString("dir")
-		
+
 		// Determine target path for editor
 		targetPath := worktreePath
 		if customDir != "" {
@@ -82,14 +86,14 @@ configuration will be automatically copied to the new worktree.`,
 				// Absolute path: use as-is
 				targetPath = customDir
 			}
-			
+
 			// Check if the target path exists
 			if _, err := os.Stat(targetPath); os.IsNotExist(err) {
 				fmt.Printf("Warning: Directory '%s' does not exist, using worktree root instead\n", targetPath)
 				targetPath = worktreePath
 			}
 		}
-		
+
 		// Auto-open editor if any flag is set
 		if openCursor {
 			fmt.Println("\n🚀 Opening Cursor...")
@@ -153,7 +157,7 @@ var configInitCmd = &cobra.Command{
 		}
 
 		configPath := filepath.Join(wd, config.ConfigFileName)
-		
+
 		if err := config.CreateDefaultConfigFile(configPath); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
@@ -226,7 +230,7 @@ var cleanCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 		force, _ := cmd.Flags().GetBool("force")
-		
+
 		manager, err := worktree.NewManager()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -264,7 +268,7 @@ var cleanCmd = &cobra.Command{
 		var analyses []worktreeAnalysis
 		for i, wt := range cleanableWorktrees {
 			fmt.Printf("Checking %d. %s...\n", i+1, filepath.Base(wt.Path))
-			
+
 			status, err := manager.CheckWorktreeStatus(wt.Path)
 			if err != nil {
 				fmt.Printf("   ❌ Error checking status: %v\n", err)
@@ -301,11 +305,11 @@ var cleanCmd = &cobra.Command{
 			fmt.Println("   - Enter 'clean' to delete only clean worktrees")
 			fmt.Println("   - Enter 'all' to delete all worktrees")
 			fmt.Println("   - Enter 'cancel' to abort")
-			
+
 			if !force {
 				fmt.Println("   ⚠️  Worktrees with uncommitted changes will require confirmation")
 			}
-			
+
 			fmt.Print("\nYour choice: ")
 			reader := bufio.NewReader(os.Stdin)
 			input, _ := reader.ReadString('\n')
@@ -352,12 +356,12 @@ var cleanCmd = &cobra.Command{
 			for _, idx := range selectedIndices {
 				analysis := analyses[idx-1]
 				fmt.Printf("\n🔄 Processing: %s\n", filepath.Base(analysis.Info.Path))
-				
+
 				if !analysis.Status.IsClean() && !force {
 					fmt.Printf("⚠️  This worktree has uncommitted changes!\n")
 					fmt.Printf("   %s\n", analysis.Status.GetStatusSummary())
 					fmt.Print("   Continue with deletion? (y/N): ")
-					
+
 					confirmInput, _ := reader.ReadString('\n')
 					if strings.ToLower(strings.TrimSpace(confirmInput)) != "y" {
 						fmt.Println("   ⏭️  Skipped.")
@@ -394,18 +398,18 @@ var cleanCmd = &cobra.Command{
 // openInEditor opens the specified directory in the chosen editor
 func openInEditor(path, editor string) error {
 	var cmd *exec.Cmd
-	
+
 	switch editor {
 	case "cursor":
 		switch runtime.GOOS {
-		case "darwin", "windows", "linux":
+		case "darwin", "windows", osLinux:
 			cmd = exec.Command("cursor", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 		}
 	case "vscode":
 		switch runtime.GOOS {
-		case "darwin", "windows", "linux":
+		case "darwin", "windows", osLinux:
 			cmd = exec.Command("code", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
@@ -423,7 +427,7 @@ func openInEditor(path, editor string) error {
 			cmd = exec.Command("open", "-a", "Android Studio", path)
 		case "windows":
 			cmd = exec.Command("studio", path)
-		case "linux":
+		case osLinux:
 			cmd = exec.Command("studio.sh", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
@@ -431,7 +435,7 @@ func openInEditor(path, editor string) error {
 	default:
 		return fmt.Errorf("unsupported editor: %s", editor)
 	}
-	
+
 	return cmd.Start()
 }
 
@@ -441,13 +445,13 @@ func init() {
 	createCmd.Flags().Bool("xcode", false, "Automatically open the created worktree in Xcode (macOS only)")
 	createCmd.Flags().Bool("android-studio", false, "Automatically open the created worktree in Android Studio")
 	createCmd.Flags().String("dir", "", "Specify directory to open in editor (absolute or relative path)")
-	
+
 	cleanCmd.Flags().Bool("dry-run", false, "Show what would be deleted without actually deleting")
 	cleanCmd.Flags().Bool("force", false, "Force deletion without confirmation for worktrees with uncommitted changes")
-	
+
 	configCmd.AddCommand(configInitCmd)
 	configCmd.AddCommand(configListCmd)
-	
+
 	rootCmd.AddCommand(createCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(listCmd)

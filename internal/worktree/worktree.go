@@ -42,7 +42,7 @@ func FindGitRepository() (string, error) {
 			if stat.IsDir() {
 				return currentDir, nil
 			}
-			
+
 			data, err := os.ReadFile(gitDir)
 			if err == nil && strings.HasPrefix(string(data), "gitdir: ") {
 				return currentDir, nil
@@ -87,7 +87,7 @@ func (m *Manager) remoteBranchExists(branch string) bool {
 func (m *Manager) fetchRemoteBranch(branch string) error {
 	cmd := exec.Command("git", "fetch", "origin", fmt.Sprintf("%s:%s", branch, branch))
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to fetch remote branch: %w\nOutput: %s", err, string(output))
@@ -98,16 +98,16 @@ func (m *Manager) fetchRemoteBranch(branch string) error {
 func (m *Manager) createNewBranch(branch string) error {
 	cmd := exec.Command("git", "checkout", "-b", branch)
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to create new branch: %w\nOutput: %s", err, string(output))
 	}
-	
+
 	cmd = exec.Command("git", "checkout", "-")
 	cmd.Dir = m.RepoRoot
-	cmd.Run()
-	
+	_ = cmd.Run()
+
 	return nil
 }
 
@@ -115,11 +115,11 @@ func (m *Manager) ensureBranchExists(branch string) error {
 	if m.branchExists(branch) {
 		return nil
 	}
-	
+
 	if m.remoteBranchExists(branch) {
 		return m.fetchRemoteBranch(branch)
 	}
-	
+
 	return m.createNewBranch(branch)
 }
 
@@ -142,7 +142,7 @@ func (m *Manager) CreateWorktree(name, branch string) (string, error) {
 
 	cmd := exec.Command("git", "worktree", "add", worktreePath, branch)
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to create worktree: %w\nOutput: %s", err, string(output))
@@ -154,7 +154,7 @@ func (m *Manager) CreateWorktree(name, branch string) (string, error) {
 func (m *Manager) ListWorktrees() ([]WorktreeInfo, error) {
 	cmd := exec.Command("git", "worktree", "list", "--porcelain")
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list worktrees: %w", err)
@@ -180,7 +180,7 @@ type WorktreeStatus struct {
 func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 	var worktrees []WorktreeInfo
 	lines := strings.Split(strings.TrimSpace(output), "\n")
-	
+
 	var current WorktreeInfo
 	for _, line := range lines {
 		if line == "" {
@@ -190,12 +190,12 @@ func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 			}
 			continue
 		}
-		
+
 		parts := strings.SplitN(line, " ", 2)
 		if len(parts) != 2 {
 			continue
 		}
-		
+
 		key, value := parts[0], parts[1]
 		switch key {
 		case "worktree":
@@ -206,53 +206,53 @@ func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 			current.Commit = value
 		}
 	}
-	
+
 	if current.Path != "" {
 		worktrees = append(worktrees, current)
 	}
-	
+
 	return worktrees, nil
 }
 
 func (m *Manager) CheckWorktreeStatus(worktreePath string) (*WorktreeStatus, error) {
 	cmd := exec.Command("git", "status", "--porcelain")
 	cmd.Dir = worktreePath
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to check git status: %w", err)
 	}
-	
+
 	status := &WorktreeStatus{}
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	
+
 	for _, line := range lines {
 		if len(line) < 2 {
 			continue
 		}
-		
+
 		indexStatus := line[0]
 		workTreeStatus := line[1]
 		fileName := strings.TrimSpace(line[2:])
-		
+
 		if indexStatus != ' ' && indexStatus != '?' {
 			status.HasStagedChanges = true
 			status.ChangedFiles = append(status.ChangedFiles, fileName)
 		}
-		
+
 		if workTreeStatus != ' ' && workTreeStatus != '?' {
 			status.HasUnstagedChanges = true
 			if !contains(status.ChangedFiles, fileName) {
 				status.ChangedFiles = append(status.ChangedFiles, fileName)
 			}
 		}
-		
+
 		if indexStatus == '?' && workTreeStatus == '?' {
 			status.HasUntrackedFiles = true
 			status.UntrackedFiles = append(status.UntrackedFiles, fileName)
 		}
 	}
-	
+
 	return status, nil
 }
 
@@ -273,7 +273,7 @@ func (s *WorktreeStatus) GetStatusSummary() string {
 	if s.IsClean() {
 		return "✅ Clean (no uncommitted changes)"
 	}
-	
+
 	var issues []string
 	if s.HasStagedChanges {
 		issues = append(issues, "staged changes")
@@ -284,30 +284,30 @@ func (s *WorktreeStatus) GetStatusSummary() string {
 	if s.HasUntrackedFiles {
 		issues = append(issues, fmt.Sprintf("%d untracked files", len(s.UntrackedFiles)))
 	}
-	
+
 	return "⚠️  " + strings.Join(issues, ", ")
 }
 
 func (m *Manager) RemoveWorktree(worktreePath string) error {
 	cmd := exec.Command("git", "worktree", "remove", worktreePath)
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to remove worktree: %w\nOutput: %s", err, string(output))
 	}
-	
+
 	return nil
 }
 
 func (m *Manager) ForceRemoveWorktree(worktreePath string) error {
 	cmd := exec.Command("git", "worktree", "remove", "--force", worktreePath)
 	cmd.Dir = m.RepoRoot
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to force remove worktree: %w\nOutput: %s", err, string(output))
 	}
-	
+
 	return nil
 }

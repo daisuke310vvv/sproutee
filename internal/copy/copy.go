@@ -18,8 +18,8 @@ type CopyResult struct {
 }
 
 type CopyReport struct {
-	Results     []CopyResult
-	TotalFiles  int
+	Results      []CopyResult
+	TotalFiles   int
 	SuccessCount int
 	FailureCount int
 }
@@ -63,7 +63,7 @@ func CopyFile(src, dst string) error {
 
 	sourceInfo, err := sourceFile.Stat()
 	if err == nil {
-		targetFile.Chmod(sourceInfo.Mode())
+		_ = targetFile.Chmod(sourceInfo.Mode())
 	}
 
 	return nil
@@ -126,7 +126,7 @@ func (r *CopyReport) PrintSummary() {
 	fmt.Printf("📁 File Copy Summary:\n")
 	fmt.Printf("   Total files: %d\n", r.TotalFiles)
 	fmt.Printf("   ✅ Successful: %d\n", r.SuccessCount)
-	
+
 	if r.FailureCount > 0 {
 		fmt.Printf("   ❌ Failed: %d\n", r.FailureCount)
 		fmt.Println("\n📋 Failed copies:")
