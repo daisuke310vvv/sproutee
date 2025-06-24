@@ -151,7 +151,7 @@ func (m *Manager) CreateWorktree(name, branch string) (string, error) {
 	return worktreePath, nil
 }
 
-func (m *Manager) ListWorktrees() ([]WorktreeInfo, error) {
+func (m *Manager) ListWorktrees() ([]Info, error) {
 	cmd := exec.Command("git", "worktree", "list", "--porcelain")
 	cmd.Dir = m.RepoRoot
 
@@ -163,13 +163,13 @@ func (m *Manager) ListWorktrees() ([]WorktreeInfo, error) {
 	return parseWorktreeList(string(output))
 }
 
-type WorktreeInfo struct {
+type Info struct {
 	Path   string
 	Branch string
 	Commit string
 }
 
-type WorktreeStatus struct {
+type Status struct {
 	HasUnstagedChanges bool
 	HasStagedChanges   bool
 	HasUntrackedFiles  bool
@@ -177,16 +177,16 @@ type WorktreeStatus struct {
 	UntrackedFiles     []string
 }
 
-func parseWorktreeList(output string) ([]WorktreeInfo, error) {
-	var worktrees []WorktreeInfo
+func parseWorktreeList(output string) ([]Info, error) {
+	var worktrees []Info
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 
-	var current WorktreeInfo
+	var current Info
 	for _, line := range lines {
 		if line == "" {
 			if current.Path != "" {
 				worktrees = append(worktrees, current)
-				current = WorktreeInfo{}
+				current = Info{}
 			}
 			continue
 		}
@@ -214,7 +214,7 @@ func parseWorktreeList(output string) ([]WorktreeInfo, error) {
 	return worktrees, nil
 }
 
-func (m *Manager) CheckWorktreeStatus(worktreePath string) (*WorktreeStatus, error) {
+func (m *Manager) CheckWorktreeStatus(worktreePath string) (*Status, error) {
 	cmd := exec.Command("git", "status", "--porcelain")
 	cmd.Dir = worktreePath
 
@@ -223,7 +223,7 @@ func (m *Manager) CheckWorktreeStatus(worktreePath string) (*WorktreeStatus, err
 		return nil, fmt.Errorf("failed to check git status: %w", err)
 	}
 
-	status := &WorktreeStatus{}
+	status := &Status{}
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
 
 	for _, line := range lines {
@@ -265,11 +265,11 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
-func (s *WorktreeStatus) IsClean() bool {
+func (s *Status) IsClean() bool {
 	return !s.HasUnstagedChanges && !s.HasStagedChanges && !s.HasUntrackedFiles
 }
 
-func (s *WorktreeStatus) GetStatusSummary() string {
+func (s *Status) GetStatusSummary() string {
 	if s.IsClean() {
 		return "✅ Clean (no uncommitted changes)"
 	}

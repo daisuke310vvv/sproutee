@@ -26,7 +26,7 @@ func TestFileExists(t *testing.T) {
 	}
 }
 
-func TestCopyFile(t *testing.T) {
+func TestFile(t *testing.T) {
 	tempDir := t.TempDir()
 
 	srcFile := filepath.Join(tempDir, "source.txt")
@@ -38,9 +38,9 @@ func TestCopyFile(t *testing.T) {
 	dstDir := filepath.Join(tempDir, "subdir")
 	dstFile := filepath.Join(dstDir, "destination.txt")
 
-	err := CopyFile(srcFile, dstFile)
+	err := File(srcFile, dstFile)
 	if err != nil {
-		t.Fatalf("CopyFile() error = %v", err)
+		t.Fatalf("File() error = %v", err)
 	}
 
 	if !FileExists(dstFile) {
@@ -57,7 +57,7 @@ func TestCopyFile(t *testing.T) {
 	}
 }
 
-func TestCopyFileWithStructure(t *testing.T) {
+func TestFileWithStructure(t *testing.T) {
 	tempDir := t.TempDir()
 
 	srcRoot := filepath.Join(tempDir, "src")
@@ -75,9 +75,9 @@ func TestCopyFileWithStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := CopyFileWithStructure(srcRoot, targetRoot, relativePath)
+	err := FileWithStructure(srcRoot, targetRoot, relativePath)
 	if err != nil {
-		t.Fatalf("CopyFileWithStructure() error = %v", err)
+		t.Fatalf("FileWithStructure() error = %v", err)
 	}
 
 	targetFile := filepath.Join(targetRoot, relativePath)
@@ -95,13 +95,13 @@ func TestCopyFileWithStructure(t *testing.T) {
 	}
 
 	nonExistentPath := "nonexistent/file.txt"
-	err = CopyFileWithStructure(srcRoot, targetRoot, nonExistentPath)
+	err = FileWithStructure(srcRoot, targetRoot, nonExistentPath)
 	if err == nil {
-		t.Error("CopyFileWithStructure() should return error for non-existent source")
+		t.Error("FileWithStructure() should return error for non-existent source")
 	}
 }
 
-func TestCopyFilesFromConfig(t *testing.T) {
+func TestFilesFromConfig(t *testing.T) {
 	tempDir := t.TempDir()
 
 	srcRoot := filepath.Join(tempDir, "src")
@@ -122,7 +122,7 @@ func TestCopyFilesFromConfig(t *testing.T) {
 		CopyFiles: []string{existingFile, nonExistentFile},
 	}
 
-	report := CopyFilesFromConfig(srcRoot, targetRoot, cfg)
+	report := FilesFromConfig(srcRoot, targetRoot, cfg)
 
 	if report.TotalFiles != 2 {
 		t.Errorf("TotalFiles = %d, want 2", report.TotalFiles)
@@ -145,17 +145,17 @@ func TestCopyFilesFromConfig(t *testing.T) {
 	}
 }
 
-func TestCopyReport_AddResult(t *testing.T) {
-	report := &CopyReport{}
+func TestReport_AddResult(t *testing.T) {
+	report := &Report{}
 
-	successResult := CopyResult{
+	successResult := Result{
 		SourcePath: "/src/file1.txt",
 		TargetPath: "/target/file1.txt",
 		Success:    true,
 		Error:      nil,
 	}
 
-	failureResult := CopyResult{
+	failureResult := Result{
 		SourcePath: "/src/file2.txt",
 		TargetPath: "/target/file2.txt",
 		Success:    false,

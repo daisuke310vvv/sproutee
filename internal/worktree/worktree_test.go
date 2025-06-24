@@ -170,8 +170,8 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func TestWorktreeStatusIsClean(t *testing.T) {
-	cleanStatus := &WorktreeStatus{
+func TestStatusIsClean(t *testing.T) {
+	cleanStatus := &Status{
 		HasUnstagedChanges: false,
 		HasStagedChanges:   false,
 		HasUntrackedFiles:  false,
@@ -181,7 +181,7 @@ func TestWorktreeStatusIsClean(t *testing.T) {
 		t.Error("Clean status should return true for IsClean()")
 	}
 
-	dirtyStatus := &WorktreeStatus{
+	dirtyStatus := &Status{
 		HasUnstagedChanges: true,
 		HasStagedChanges:   false,
 		HasUntrackedFiles:  false,
@@ -192,8 +192,8 @@ func TestWorktreeStatusIsClean(t *testing.T) {
 	}
 }
 
-func TestWorktreeStatusGetStatusSummary(t *testing.T) {
-	cleanStatus := &WorktreeStatus{
+func TestStatusGetStatusSummary(t *testing.T) {
+	cleanStatus := &Status{
 		HasUnstagedChanges: false,
 		HasStagedChanges:   false,
 		HasUntrackedFiles:  false,
@@ -204,7 +204,7 @@ func TestWorktreeStatusGetStatusSummary(t *testing.T) {
 		t.Errorf("Clean status summary should contain 'Clean', got: %s", summary)
 	}
 
-	dirtyStatus := &WorktreeStatus{
+	dirtyStatus := &Status{
 		HasUnstagedChanges: true,
 		HasStagedChanges:   true,
 		HasUntrackedFiles:  true,

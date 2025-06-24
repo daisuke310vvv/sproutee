@@ -64,7 +64,7 @@ configuration will be automatically copied to the new worktree.`,
 		fmt.Printf("✅ Worktree created successfully at: %s\n", worktreePath)
 
 		fmt.Println("\n📁 Copying configured files...")
-		copyReport, err := copy.CopyFilesToWorktree(manager.RepoRoot, worktreePath)
+		copyReport, err := copy.FilesToWorktree(manager.RepoRoot, worktreePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: Failed to copy files: %v\n", err)
 		} else {
@@ -246,7 +246,7 @@ var cleanCmd = &cobra.Command{
 		}
 
 		// Filter out main worktree (repository root)
-		var cleanableWorktrees []worktree.WorktreeInfo
+		var cleanableWorktrees []worktree.Info
 		for _, wt := range worktrees {
 			if wt.Path != manager.RepoRoot {
 				cleanableWorktrees = append(cleanableWorktrees, wt)
@@ -262,8 +262,8 @@ var cleanCmd = &cobra.Command{
 
 		// Analyze each worktree
 		type worktreeAnalysis struct {
-			Info   worktree.WorktreeInfo
-			Status *worktree.WorktreeStatus
+			Info   worktree.Info
+			Status *worktree.Status
 			Index  int
 		}
 

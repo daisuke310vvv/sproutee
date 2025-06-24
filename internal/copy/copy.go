@@ -10,21 +10,21 @@ import (
 	"github.com/daisuke310vvv/sproutee/internal/config"
 )
 
-type CopyResult struct {
+type Result struct {
 	SourcePath string
 	TargetPath string
 	Success    bool
 	Error      error
 }
 
-type CopyReport struct {
-	Results      []CopyResult
+type Report struct {
+	Results      []Result
 	TotalFiles   int
 	SuccessCount int
 	FailureCount int
 }
 
-func (r *CopyReport) AddResult(result CopyResult) {
+func (r *Report) AddResult(result Result) {
 	r.Results = append(r.Results, result)
 	r.TotalFiles++
 	if result.Success {
@@ -39,7 +39,7 @@ func FileExists(filePath string) bool {
 	return err == nil
 }
 
-func CopyFile(src, dst string) error {
+func File(src, dst string) error {
 	sourceFile, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("failed to open source file: %w", err)
@@ -69,7 +69,7 @@ func CopyFile(src, dst string) error {
 	return nil
 }
 
-func CopyFileWithStructure(srcRoot, targetRoot, relativePath string) error {
+func FileWithStructure(srcRoot, targetRoot, relativePath string) error {
 	srcPath := filepath.Join(srcRoot, relativePath)
 	dstPath := filepath.Join(targetRoot, relativePath)
 
@@ -77,14 +77,14 @@ func CopyFileWithStructure(srcRoot, targetRoot, relativePath string) error {
 		return fmt.Errorf("source file does not exist: %s", srcPath)
 	}
 
-	return CopyFile(srcPath, dstPath)
+	return File(srcPath, dstPath)
 }
 
-func CopyFilesFromConfig(srcRoot, targetRoot string, cfg *config.Config) *CopyReport {
-	report := &CopyReport{}
+func FilesFromConfig(srcRoot, targetRoot string, cfg *config.Config) *Report {
+	report := &Report{}
 
 	for _, filePath := range cfg.CopyFiles {
-		result := CopyResult{
+		result := Result{
 			SourcePath: filepath.Join(srcRoot, filePath),
 			TargetPath: filepath.Join(targetRoot, filePath),
 		}
@@ -93,7 +93,7 @@ func CopyFilesFromConfig(srcRoot, targetRoot string, cfg *config.Config) *CopyRe
 			result.Success = false
 			result.Error = fmt.Errorf("source file does not exist: %s", result.SourcePath)
 		} else {
-			err := CopyFileWithStructure(srcRoot, targetRoot, filePath)
+			err := FileWithStructure(srcRoot, targetRoot, filePath)
 			if err != nil {
 				result.Success = false
 				result.Error = err
@@ -108,16 +108,16 @@ func CopyFilesFromConfig(srcRoot, targetRoot string, cfg *config.Config) *CopyRe
 	return report
 }
 
-func CopyFilesToWorktree(sourceRepoRoot, worktreePath string) (*CopyReport, error) {
+func FilesToWorktree(sourceRepoRoot, worktreePath string) (*Report, error) {
 	cfg, err := config.LoadConfigFromCurrentDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	return CopyFilesFromConfig(sourceRepoRoot, worktreePath, cfg), nil
+	return FilesFromConfig(sourceRepoRoot, worktreePath, cfg), nil
 }
 
-func (r *CopyReport) PrintSummary() {
+func (r *Report) PrintSummary() {
 	if r.TotalFiles == 0 {
 		fmt.Println("📁 No files configured for copying.")
 		return
