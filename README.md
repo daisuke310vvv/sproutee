@@ -56,14 +56,14 @@ Download the latest release from [GitHub Releases](https://github.com/daisuke310
 # Initialize configuration
 sproutee config init
 
-# Create a worktree from main branch
-sproutee create feature-auth main
+# Create a worktree (creates branch with same name)
+sproutee create feature-auth
 
 # Create worktree and open in VS Code
-sproutee create bugfix-login develop --vscode
+sproutee create bugfix-login --vscode
 
 # Create worktree and open specific directory in editor
-sproutee create feature-frontend main --cursor --dir ./src/frontend
+sproutee create feature-frontend --cursor --dir ./src/frontend
 
 # List all worktrees
 sproutee list
@@ -74,23 +74,23 @@ sproutee clean
 
 ## Commands
 
-### `sproutee create <name> [branch]`
+### `sproutee create <name>`
 
-Creates a new Git worktree with automatic file copying.
+Creates a new Git worktree with automatic file copying. The name is used as both the worktree directory name and the branch name.
 
 ```bash
-# Basic usage
-sproutee create feature-dashboard main
+# Basic usage - creates worktree and branch both named 'feature-dashboard'
+sproutee create feature-dashboard
 
 # With editor integration
-sproutee create feature-auth main --cursor    # Open in Cursor
-sproutee create hotfix-bug develop --vscode   # Open in VS Code
-sproutee create ios-feature main --xcode      # Open in Xcode (macOS only)
-sproutee create android-fix main --android-studio  # Open in Android Studio
+sproutee create feature-auth --cursor    # Open in Cursor
+sproutee create hotfix-bug --vscode      # Open in VS Code
+sproutee create ios-feature --xcode      # Open in Xcode (macOS only)
+sproutee create android-fix --android-studio  # Open in Android Studio
 
 # Open specific directory in editor
-sproutee create feature-api main --cursor --dir ./backend
-sproutee create ui-components main --vscode --dir ./src/components
+sproutee create feature-api --cursor --dir ./backend
+sproutee create ui-components --vscode --dir ./src/components
 ```
 
 **Options:**
@@ -235,13 +235,13 @@ The `--dir` option allows you to specify which directory to open in your editor:
 
 ```bash
 # Open specific subdirectory (relative path)
-sproutee create feature-backend main --cursor --dir ./backend
+sproutee create feature-backend --cursor --dir ./backend
 
 # Open specific subdirectory (absolute path)
-sproutee create feature-docs main --vscode --dir /path/to/documentation
+sproutee create feature-docs --vscode --dir /path/to/documentation
 
 # Without --dir, opens the worktree root (default behavior)
-sproutee create feature main --cursor
+sproutee create feature --cursor
 ```
 
 **Behavior:**
@@ -269,15 +269,15 @@ echo '{
 }' > sproutee.json
 
 # 3. Create feature worktree
-sproutee create feature-user-auth main --vscode
+sproutee create feature-user-auth --vscode
 
 # 4. Create frontend-specific worktree
-sproutee create feature-ui main --cursor --dir ./frontend
+sproutee create feature-ui --cursor --dir ./frontend
 
 # 5. Work on feature...
 
 # 6. Create another worktree for hotfix
-sproutee create hotfix-critical-bug production --cursor
+sproutee create hotfix-critical-bug --cursor
 
 # 6. View all worktrees
 sproutee list
@@ -289,18 +289,15 @@ sproutee clean
 ### Advanced Usage
 
 ```bash
-# Create worktree from specific commit
-sproutee create feature-revert abc123
-
-# Create worktree from remote branch
-sproutee create feature-collaboration origin/feature-branch
+# Create worktree (automatically creates branch with same name)
+sproutee create feature-new-api
 
 # Open specific subdirectory in editor
-sproutee create backend-refactor main --vscode --dir ./api
-sproutee create mobile-app main --android-studio --dir ./mobile
+sproutee create backend-refactor --vscode --dir ./api
+sproutee create mobile-app --android-studio --dir ./mobile
 
 # Use absolute paths
-sproutee create docs-update main --cursor --dir /path/to/docs
+sproutee create docs-update --cursor --dir /path/to/docs
 
 # Clean up only clean worktrees
 sproutee clean

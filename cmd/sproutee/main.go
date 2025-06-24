@@ -31,18 +31,15 @@ in .git/sproutee-worktrees/ directory and automatically copying configured files
 }
 
 var createCmd = &cobra.Command{
-	Use:   "create <name> [branch]",
+	Use:   "create <name>",
 	Short: "Create a new worktree with file copying",
-	Long: `Create a new Git worktree with the specified name and optionally 
-from a specific branch. Files specified in the configuration will be 
-automatically copied to the new worktree.`,
-	Args: cobra.RangeArgs(1, 2),
+	Long: `Create a new Git worktree with the specified name. The name will be used 
+as both the worktree directory name and the branch name. Files specified in the 
+configuration will be automatically copied to the new worktree.`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
-		branch := "HEAD"
-		if len(args) > 1 {
-			branch = args[1]
-		}
+		branch := name
 
 		manager, err := worktree.NewManager()
 		if err != nil {
@@ -50,7 +47,7 @@ automatically copied to the new worktree.`,
 			os.Exit(1)
 		}
 
-		fmt.Printf("Creating worktree '%s' from branch '%s'...\n", name, branch)
+		fmt.Printf("Creating worktree '%s' with branch '%s'...\n", name, branch)
 		
 		worktreePath, err := manager.CreateWorktree(name, branch)
 		if err != nil {
