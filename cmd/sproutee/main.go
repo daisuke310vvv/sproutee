@@ -25,7 +25,7 @@ const (
 var rootCmd = &cobra.Command{
 	Use:   "sproutee",
 	Short: "A CLI tool for managing Git worktrees efficiently",
-	Long: `Sproutee is a CLI tool that automates worktree creation and 
+	Long: `Sproutee is a CLI tool that automates worktree creation and
 copies specified files to new worktrees based on configuration.
 
 It helps manage multiple branches efficiently by creating worktrees
@@ -39,8 +39,8 @@ in .git/sproutee-worktrees/ directory and automatically copying configured files
 var createCmd = &cobra.Command{
 	Use:   "create <name>",
 	Short: "Create a new worktree with file copying",
-	Long: `Create a new Git worktree with the specified name. The name will be used 
-as both the worktree directory name and the branch name. Files specified in the 
+	Long: `Create a new Git worktree with the specified name. The name will be used
+as both the worktree directory name and the branch name. Files specified in the
 configuration will be automatically copied to the new worktree.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -212,7 +212,7 @@ var listCmd = &cobra.Command{
 		}
 
 		pathOnly, _ := cmd.Flags().GetBool("path")
-		
+
 		if pathOnly {
 			for _, wt := range worktrees {
 				fmt.Println(wt.Path)
