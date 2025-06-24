@@ -2,6 +2,11 @@ run:
   timeout: 5m
   go: '1.21'
 
+output:
+  formats:
+    - format: colored-line-number
+      path: stdout
+
 linters:
   enable:
     - gofmt
@@ -11,10 +16,7 @@ linters:
     - staticcheck
     - unused
     - gosimple
-    - structcheck
-    - varcheck
     - ineffassign
-    - deadcode
     - typecheck
     - gosec
     - misspell
@@ -24,6 +26,10 @@ linters:
     - gocyclo
     - gofumpt
     - revive
+  disable:
+    - deadcode    # Deprecated, replaced by unused
+    - structcheck # Deprecated, replaced by unused
+    - varcheck    # Deprecated, replaced by unused
 
 linters-settings:
   gocyclo:
