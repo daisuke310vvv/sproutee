@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	osLinux  = "linux"
-	osDarwin = "darwin"
+	osLinux   = "linux"
+	osDarwin  = "darwin"
+	osWindows = "windows"
 )
 
 var rootCmd = &cobra.Command{
@@ -228,7 +229,7 @@ var cleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean up worktrees",
 	Long:  "Remove unused or orphaned worktrees. Interactive selection with safety checks for uncommitted changes.",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 		force, _ := cmd.Flags().GetBool("force")
 
@@ -403,14 +404,14 @@ func openInEditor(path, editor string) error {
 	switch editor {
 	case "cursor":
 		switch runtime.GOOS {
-		case osDarwin, "windows", osLinux:
+		case osDarwin, osWindows, osLinux:
 			cmd = exec.Command("cursor", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 		}
 	case "vscode":
 		switch runtime.GOOS {
-		case osDarwin, "windows", osLinux:
+		case osDarwin, osWindows, osLinux:
 			cmd = exec.Command("code", path)
 		default:
 			return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
@@ -426,7 +427,7 @@ func openInEditor(path, editor string) error {
 		switch runtime.GOOS {
 		case osDarwin:
 			cmd = exec.Command("open", "-a", "Android Studio", path)
-		case "windows":
+		case osWindows:
 			cmd = exec.Command("studio", path)
 		case osLinux:
 			cmd = exec.Command("studio.sh", path)
