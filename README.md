@@ -117,8 +117,8 @@ Display all existing worktrees with branch and commit information.
 sproutee list
 # Output:
 # Found 2 worktree(s):
-#   1. /path/to/repo/.git/sproutee-worktrees/feature_20241212_143022 (branch: feature-auth) [a1b2c3d4]
-#   2. /path/to/repo/.git/sproutee-worktrees/bugfix_20241212_144055 (branch: bugfix-login) [e5f6g7h8]
+#   1. ~/.sproutee/my-project/feature_20241212_143022 (branch: feature-auth) [a1b2c3d4]
+#   2. ~/.sproutee/my-project/bugfix_20241212_144055 (branch: bugfix-login) [e5f6g7h8]
 ```
 
 ### `sproutee clean`
@@ -204,14 +204,16 @@ Sproutee organizes worktrees in a clean, predictable structure:
 ```
 your-repo/
 ├── .git/
-│   ├── sproutee-worktrees/          # Sproutee worktrees (actual code)
-│   │   ├── feature_20241212_143022/
-│   │   └── bugfix_20241212_144055/
 │   └── worktrees/                   # Git metadata (managed by Git)
 │       ├── feature_20241212_143022/
 │       └── bugfix_20241212_144055/
 ├── sproutee.json                    # Configuration file
 └── ...                             # Your project files
+
+~/.sproutee/                         # Sproutee home directory
+└── your-repo/                       # Project-specific worktrees
+    ├── feature_20241212_143022/     # Actual worktree code
+    └── bugfix_20241212_144055/      # Actual worktree code
 ```
 
 ## Editor Integration

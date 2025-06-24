@@ -87,15 +87,41 @@ func TestManagerGenerateWorktreeDirName(t *testing.T) {
 	}
 }
 
+func TestManagerGetProjectName(t *testing.T) {
+	tests := []struct {
+		repoRoot     string
+		expectedName string
+	}{
+		{"/test/repo", "repo"},
+		{"/path/to/my-project", "my-project"},
+		{"/home/user/code/sproutee", "sproutee"},
+		{filepath.Join("C:", "Users", "user", "code", "my-app"), "my-app"},
+	}
+
+	for _, tt := range tests {
+		manager := &Manager{RepoRoot: tt.repoRoot}
+		projectName := manager.getProjectName()
+
+		if projectName != tt.expectedName {
+			t.Errorf("getProjectName() for %s = %v, want %v", tt.repoRoot, projectName, tt.expectedName)
+		}
+	}
+}
+
 func TestManagerGetWorktreeBasePath(t *testing.T) {
 	repoRoot := "/test/repo"
 	manager := &Manager{RepoRoot: repoRoot}
 
 	basePath := manager.GetWorktreeBasePath()
-	expected := filepath.Join(repoRoot, WorktreeDir)
 
-	if basePath != expected {
-		t.Errorf("GetWorktreeBasePath() = %v, want %v", basePath, expected)
+	// Should contain home directory and project name
+	if !strings.Contains(basePath, SprouteeDir) {
+		t.Errorf("GetWorktreeBasePath() should contain %s, got %v", SprouteeDir, basePath)
+	}
+
+	// Should contain project name (repo)
+	if !strings.Contains(basePath, "repo") {
+		t.Errorf("GetWorktreeBasePath() should contain project name 'repo', got %v", basePath)
 	}
 }
 
