@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	WorktreeDir = ".git/sproutee-worktrees"
+	SprouteeDir = ".sproutee"
 )
 
 type Manager struct {
@@ -68,8 +68,18 @@ func (m *Manager) GenerateWorktreeDirName(name string) (string, error) {
 	return fmt.Sprintf("%s_%s", name, timestamp), nil
 }
 
+func (m *Manager) getProjectName() string {
+	return filepath.Base(m.RepoRoot)
+}
+
 func (m *Manager) GetWorktreeBasePath() string {
-	return filepath.Join(m.RepoRoot, WorktreeDir)
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join(m.RepoRoot, SprouteeDir)
+	}
+
+	projectName := m.getProjectName()
+	return filepath.Join(homeDir, SprouteeDir, projectName)
 }
 
 func (m *Manager) branchExists(branch string) bool {
