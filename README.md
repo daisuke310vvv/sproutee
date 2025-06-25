@@ -16,6 +16,7 @@ Sproutee streamlines your Git workflow by automating worktree creation and intel
 - 📁 **Smart File Copying**: Automatically copies configured files to new worktrees
 - 🎯 **Multi-Editor Support**: Launch Cursor, VS Code, Xcode, or Android Studio automatically with custom directory targeting
 - ⚙️ **Flexible Configuration**: JSON-based configuration for file management
+- 🔧 **Init Script Execution**: Run custom initialization scripts after worktree creation
 - 🧹 **Safe Cleanup**: Interactive worktree cleanup with uncommitted change detection
 - 🔍 **Status Monitoring**: Track worktree status and changes
 - 🛡️ **Cross-Platform**: Works on macOS, Windows, and Linux
@@ -147,6 +148,13 @@ Sproutee searches for `sproutee.json` in the following order:
 1. Current directory
 2. Parent directories (up to repository root)
 
+### Configuration Options
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `copy_files` | `string[]` | Yes | Array of file paths to copy to new worktrees |
+| `init_scripts` | `string[]` | No | Array of commands to execute after worktree creation |
+
 ### Configuration Format
 
 ```json
@@ -159,7 +167,8 @@ Sproutee searches for `sproutee.json` in the following order:
     "yarn.lock",
     "Makefile",
     ".vscode/settings.json"
-  ]
+  ],
+  "init_scripts": ["npm install", "npm run build"]
 }
 ```
 
@@ -174,7 +183,8 @@ Sproutee searches for `sproutee.json` in the following order:
     "package-lock.json",
     "yarn.lock",
     ".nvmrc"
-  ]
+  ],
+  "init_scripts": ["npm install", "npm run build"]
 }
 ```
 
@@ -186,11 +196,25 @@ Sproutee searches for `sproutee.json` in the following order:
     "docker-compose.yml",
     "Makefile",
     ".tool-versions"
-  ]
+  ],
+  "init_scripts": ["go mod download"]
 }
 ```
 
-**Empty Configuration (no file copying):**
+**Python Project:**
+```json
+{
+  "copy_files": [
+    ".env",
+    "requirements.txt",
+    "poetry.lock",
+    ".python-version"
+  ],
+  "init_scripts": ["pip install -r requirements.txt"]
+}
+```
+
+**Empty Configuration (no file copying or init scripts):**
 ```json
 {
   "copy_files": []
@@ -261,13 +285,14 @@ sproutee create feature --cursor
 cd my-project
 sproutee config init
 
-# 2. Edit sproutee.json to include necessary files
+# 2. Edit sproutee.json to include necessary files and init scripts
 echo '{
   "copy_files": [
     ".env",
     "docker-compose.yml",
     "package-lock.json"
-  ]
+  ],
+  "init_scripts": ["npm install", "npm run build"]
 }' > sproutee.json
 
 # 3. Create feature worktree
