@@ -25,7 +25,7 @@ const (
 var rootCmd = &cobra.Command{
 	Use:   "sproutee",
 	Short: "A CLI tool for managing Git worktrees efficiently",
-	Long: `Sproutee is a CLI tool that automates worktree creation and 
+	Long: `Sproutee is a CLI tool that automates worktree creation and
 copies specified files to new worktrees based on configuration.
 
 It helps manage multiple branches efficiently by creating worktrees
@@ -39,8 +39,8 @@ in .git/sproutee-worktrees/ directory and automatically copying configured files
 var createCmd = &cobra.Command{
 	Use:   "create <name>",
 	Short: "Create a new worktree with file copying",
-	Long: `Create a new Git worktree with the specified name. The name will be used 
-as both the worktree directory name and the branch name. Files specified in the 
+	Long: `Create a new Git worktree with the specified name. The name will be used
+as both the worktree directory name and the branch name. Files specified in the
 configuration will be automatically copied to the new worktree.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -193,7 +193,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List existing worktrees",
 	Long:  "Display all existing worktrees created by Sproutee.",
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		manager, err := worktree.NewManager()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -211,16 +211,24 @@ var listCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Found %d worktree(s):\n", len(worktrees))
-		for i, wt := range worktrees {
-			fmt.Printf("  %d. %s", i+1, wt.Path)
-			if wt.Branch != "" {
-				fmt.Printf(" (branch: %s)", wt.Branch)
+		pathOnly, _ := cmd.Flags().GetBool("path")
+
+		if pathOnly {
+			for _, wt := range worktrees {
+				fmt.Println(wt.Path)
 			}
-			if wt.Commit != "" {
-				fmt.Printf(" [%s]", wt.Commit[:8])
+		} else {
+			fmt.Printf("Found %d worktree(s):\n", len(worktrees))
+			for i, wt := range worktrees {
+				fmt.Printf("  %d. %s", i+1, wt.Path)
+				if wt.Branch != "" {
+					fmt.Printf(" (branch: %s)", wt.Branch)
+				}
+				if wt.Commit != "" {
+					fmt.Printf(" [%s]", wt.Commit[:8])
+				}
+				fmt.Println()
 			}
-			fmt.Println()
 		}
 	},
 }
@@ -450,6 +458,8 @@ func init() {
 
 	cleanCmd.Flags().Bool("dry-run", false, "Show what would be deleted without actually deleting")
 	cleanCmd.Flags().Bool("force", false, "Force deletion without confirmation for worktrees with uncommitted changes")
+
+	listCmd.Flags().BoolP("path", "p", false, "Show only paths of worktrees")
 
 	configCmd.AddCommand(configInitCmd)
 	configCmd.AddCommand(configListCmd)
