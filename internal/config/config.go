@@ -10,7 +10,8 @@ import (
 const ConfigFileName = "sproutee.json"
 
 type Config struct {
-	CopyFiles []string `json:"copy_files"`
+	CopyFiles   []string `json:"copy_files"`
+	InitScripts []string `json:"init_scripts,omitempty"`
 }
 
 func DefaultConfig() *Config {

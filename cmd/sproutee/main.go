@@ -96,6 +96,21 @@ configuration will be automatically copied to the new worktree.`,
 			}
 		}
 
+		// Execute init scripts if configured
+		cfg, err := config.LoadConfigFromCurrentDir()
+		if err == nil && len(cfg.InitScripts) > 0 {
+			fmt.Printf("\n🔧 Running %d init script(s)...\n", len(cfg.InitScripts))
+			for i, script := range cfg.InitScripts {
+				fmt.Printf("  [%d/%d] %s\n", i+1, len(cfg.InitScripts), script)
+				if err := runInitScript(script, worktreePath); err != nil {
+					fmt.Fprintf(os.Stderr, "Warning: Failed to run init script %d: %v\n", i+1, err)
+				} else {
+					fmt.Printf("  ✅ Script %d completed successfully\n", i+1)
+				}
+			}
+			fmt.Println("🎉 All init scripts completed")
+		}
+
 		// Auto-open editor if any flag is set
 		if openCursor {
 			fmt.Println("\n🚀 Opening Cursor...")
@@ -185,6 +200,15 @@ var configListCmd = &cobra.Command{
 		fmt.Printf("Files to copy: %d\n", len(cfg.CopyFiles))
 		for i, file := range cfg.CopyFiles {
 			fmt.Printf("  %d. %s\n", i+1, file)
+		}
+
+		if len(cfg.InitScripts) > 0 {
+			fmt.Printf("Init scripts: %d\n", len(cfg.InitScripts))
+			for i, script := range cfg.InitScripts {
+				fmt.Printf("  %d. %s\n", i+1, script)
+			}
+		} else {
+			fmt.Println("Init scripts: (not configured)")
 		}
 	},
 }
@@ -447,6 +471,28 @@ func openInEditor(path, editor string) error {
 	}
 
 	return cmd.Start()
+}
+
+// runInitScript executes the specified script in the worktree directory
+func runInitScript(script, workingDir string) error {
+	if strings.TrimSpace(script) == "" {
+		return fmt.Errorf("empty script command")
+	}
+
+	// Use shell to execute the entire command string
+	// This allows for complex commands with pipes, && operators, etc.
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", script)
+	} else {
+		cmd = exec.Command("sh", "-c", script)
+	}
+
+	cmd.Dir = workingDir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }
 
 func init() {
